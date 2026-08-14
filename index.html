@@ -1,4 +1,13 @@
-<title>사주 직업 해부기</title>
+<title>사주 직업 뽑기 🔮</title>
+<script>
+  // 기본은 「가볍게 뽑아보는 앱」. 근거·민감도·계산 설명은 .lab 클래스로 묶어 감춘다.
+  // 지운 게 아니라 감춘 것이라, 주소 끝에 ?lab=1 을 붙이면 전부 다시 나온다.
+  if(!/[?&]lab/.test(location.search)) document.documentElement.classList.add('lite');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
 <style>
 :root{
   --ink:#14161A; --plate:#1C1F25; --edge:#2C3138; --edge2:#3A4048;
@@ -394,22 +403,100 @@ select{border-radius:var(--r-sm);padding:9px 10px}
 select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
 .pref button:focus-visible,.mg button:focus-visible,.row summary:focus-visible{
   outline-width:3px;outline-offset:3px}
+
+/* ── 둥근 글씨체 ──
+   Jua = 제목·사주 글자용 둥근 고딕. Gowun Dodum = 본문용 둥근 고딕.
+   둘 다 한 굵기만 있어서 bold를 지정하면 브라우저가 억지로 두껍게 만들어 뭉갠다.
+   그래서 font-weight는 400으로 고정한다. */
+:root{
+  --font-d:"Jua","Gowun Dodum",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --font-b:"Gowun Dodum",Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+h1{font-family:var(--font-d);font-weight:400;letter-spacing:-.01em}
+.does b,.notes h3,.panelhead h2,.iv .jn,.resnice,.badge b,.ss b,.advline,
+.srow .sp b,.mini .mnm{font-weight:400}
+body{line-height:1.7}
+
+/* ── 수정구 그림 ── */
+.herorow{display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.heroart{flex:none;line-height:0}
+.heroart svg{overflow:visible}
+.herotext{flex:1 1 280px;min-width:0}
+@media(max-width:560px){.heroart svg{width:92px;height:92px}}
+.spark{transform-box:fill-box;transform-origin:center;
+  animation:twinkle 2.6s ease-in-out infinite}
+.spark.s2{animation-delay:.6s}
+.spark.s3{animation-delay:1.2s}
+@keyframes twinkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+
+/* ── 가벼운 모드 ──
+   .lab = 근거·민감도·계산 설명. 지우지 않고 감춘다. ?lab=1 이면 .lite가 안 붙어 전부 보인다.
+   .litely = 가벼운 모드에서만 보이는 것. */
+.litely{display:none}
+.lite .litely{display:block}
+.lite .lab{display:none!important}
+.lite .rname .why,
+.lite .rname .caret,
+.lite .detail,
+.lite .srare,
+.lite .refute{display:none}
+.lite .row summary{cursor:default}
+.lite footer.litely{margin-top:36px;border-top:1px dashed var(--edge);
+  padding:18px 0 48px;text-align:center;color:var(--tx3);font-size:var(--f-sm)}
 </style>
 
 <header class="top">
   <div class="wrap">
-    <p class="eyebrow">saju-stats / 4기둥 직업 해부 · 해석 감사 도구</p>
-    <h1 id="hero">당신의 직업은~? <span class="drum">두구두구두구</span></h1>
-    <p class="herocap" id="herocap" hidden></p>
-    <p class="lede">년·월·일·시 네 기둥을 고르면 직업을 추천한다.
-      그리고 <b>그 추천이 어디서 왔는지, 설정을 바꾸면 얼마나 버티는지</b>를 같이 보여준다.
-      맞히는 것보다 <b>어디서 만들어졌는지</b>를 보는 도구다.</p>
-    <p class="warn"><b>1등을 믿지 말 것.</b> 무작위 사주 3000개로 재보니
+    <p class="eyebrow lab">saju-stats / 4기둥 직업 해부 · 해석 감사 도구</p>
+
+    <div class="herorow">
+      <div class="heroart" aria-hidden="true">
+        <svg viewBox="0 0 130 130" width="130" height="130">
+          <defs>
+            <radialGradient id="ballg" cx="34%" cy="28%" r="78%">
+              <stop offset="0%" stop-color="var(--bar2)"/>
+              <stop offset="100%" stop-color="var(--bar)"/>
+            </radialGradient>
+          </defs>
+          <ellipse cx="65" cy="116" rx="34" ry="6" fill="var(--edge)"/>
+          <path d="M38 100h54l-7 12H45z" fill="var(--to)" rx="4"/>
+          <rect x="34" y="94" width="62" height="9" rx="4.5" fill="var(--to)"/>
+          <circle cx="65" cy="60" r="40" fill="url(#ballg)"/>
+          <ellipse cx="50" cy="45" rx="12" ry="9" fill="#fff" opacity=".45"
+            transform="rotate(-28 50 45)"/>
+          <g fill="var(--plate)" opacity=".85">
+            <circle cx="55" cy="62" r="3.4"/><circle cx="76" cy="62" r="3.4"/>
+          </g>
+          <path d="M60 74q5.5 5 11 0" stroke="var(--plate)" stroke-width="3"
+            stroke-linecap="round" fill="none" opacity=".85"/>
+          <g class="spark" fill="var(--to)">
+            <path d="M18 34l2.6 6.4L27 43l-6.4 2.6L18 52l-2.6-6.4L9 43l6.4-2.6z"/>
+          </g>
+          <g class="spark s2" fill="var(--mok)">
+            <path d="M110 22l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>
+          </g>
+          <g class="spark s3" fill="var(--su)">
+            <path d="M108 78l1.8 4.4 4.4 1.8-4.4 1.8-1.8 4.4-1.8-4.4-4.4-1.8 4.4-1.8z"/>
+          </g>
+        </svg>
+      </div>
+      <div class="herotext">
+        <h1 id="hero">당신의 직업은~? <span class="drum">두구두구두구</span></h1>
+        <p class="herocap" id="herocap" hidden></p>
+        <p class="lede litely">네 기둥을 고르면 어울리는 직업을 뽑아준다.
+          가볍게, 재미로 🍀</p>
+        <p class="lede lab">년·월·일·시 네 기둥을 고르면 직업을 추천한다.
+          그리고 <b>그 추천이 어디서 왔는지, 설정을 바꾸면 얼마나 버티는지</b>를 같이 보여준다.
+          맞히는 것보다 <b>어디서 만들어졌는지</b>를 보는 도구다.</p>
+      </div>
+    </div>
+
+    <p class="warn lab"><b>1등을 믿지 말 것.</b> 무작위 사주 3000개로 재보니
       <b>94.7%</b>에서 설정을 바꾸면 1위가 바뀌었고, 한 사주가 평균 <b>3.5개</b>의 서로 다른 1위를 가졌다.
       이 페이지는 그 사실을 각주로 숨기지 않고 <b>순위표 위에 띄운다.</b>
       자료 자체도 유파·저자 미확인이고 <b>이건 통계 검정이 아니다</b> —
       검정은 <code>03-가설-사전등록.md</code> · <code>07-가설-추출.md</code>에서 따로 한다.</p>
-    <div class="does">
+    <div class="does lab">
       <div><span class="dn">01</span><b>원문이 적은 말</b>
         매핑이 개입하지 않은 유일한 출력. 그 칸에 쓰여 있는 직업어 그대로.</div>
       <div><span class="dn">02</span><b>128설정 민감도</b>
@@ -417,7 +504,7 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
       <div><span class="dn">03</span><b>토글로 뺀 임의성</b>
         배점·십신·기저보정·어휘 무게. 켜고 끄면 답이 얼마나 흔들리는지 보인다.</div>
     </div>
-    <p class="lede" style="margin-top:14px;font-size:var(--f-sm)">
+    <p class="lede lab" style="margin-top:14px;font-size:var(--f-sm)">
       <b>하지 않는 것:</b> 「당신은 X를 하세요」라고 말하지 않는다.
       사주와 직업의 인과가 검증되지 않은 상태에서 그 말을 하면, 아래에 쌓아둔 게 전부 무의미해진다.</p>
   </div>
@@ -427,12 +514,12 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
   <div class="panel">
     <div class="panelhead"><h2>기둥 선택</h2><span class="hint">순서대로 — 년 · 월 · 일 · 시</span></div>
     <div class="pillars" id="pillars"></div>
-    <div class="daeunwrap">
+    <div class="daeunwrap lab">
       <p class="dcap"><b>대운</b> — 10년마다 바뀌는 운의 기둥. 알면 넣고, 모르면 비워두면 된다.
         타고난 네 기둥과 <b>같은 무게(1)</b>로 센다.</p>
       <div class="pillars" id="daeun"></div>
     </div>
-    <div class="cov" id="cov"></div>
+    <div class="cov lab" id="cov"></div>
   </div>
 
   <div class="panel" id="profpanel" hidden>
@@ -448,7 +535,7 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
     <div id="srcout"></div>
   </div>
 
-  <div class="panel" id="stabpanel" hidden>
+  <div class="panel lab" id="stabpanel" hidden>
     <div class="panelhead"><h2>가장 자주 나온 결과</h2>
       <span class="hint">채점 방식을 128가지로 바꿔가며 돌린 뒤, 제일 많이 1등한 것</span></div>
     <div id="stabout"></div>
@@ -472,9 +559,9 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
   </div>
 
   <div class="panel">
-    <div class="panelhead"><h2>직업 추천</h2><span class="hint">열면 근거가 보인다</span></div>
+    <div class="panelhead"><h2>직업 추천</h2><span class="hint lab">열면 근거가 보인다</span></div>
 
-    <div class="modes">
+    <div class="modes lab">
       <span class="mg"><span class="mlbl">기둥 배점</span>
         <button type="button" id="w0" data-w="0" aria-pressed="true">균등 1·1·1·1 · 대운 1</button>
         <button type="button" id="w1" data-w="1" aria-pressed="false">월지 중심 1·2·1.5·1 · 대운 1</button>
@@ -487,10 +574,10 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
       </span>
     </div>
 
-    <p class="expcap">실험 — <b>성향 어휘를 어떻게 다룰 것인가.</b>
+    <p class="expcap lab">실험 — <b>성향 어휘를 어떻게 다룰 것인가.</b>
       넷 다 기본값은 현행이다. 켜고 끄면서 순위가 얼마나 흔들리는지 직접 보라고 둔 것이고,
       <b>답을 골라둔 게 아니다.</b> 흔들린다면 그 추천은 자료가 아니라 이 선택이 만든 것이다.</p>
-    <div class="modes exp" id="expopts">
+    <div class="modes exp lab" id="expopts">
       <span class="mg"><span class="mlbl">어휘 무게</span>
         <button type="button" data-o="aw" data-v="0" aria-pressed="true">항목당 — 현행</button>
         <button type="button" data-o="aw" data-v="1" aria-pressed="false">어휘당 — 성향 1표를 나눠 가짐</button>
@@ -508,8 +595,8 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
         <button type="button" data-o="dp" data-v="1" aria-pressed="false">의료·금융 — 원문 근거만</button>
       </span>
     </div>
-    <p class="wnote" id="wnote"></p>
-    <div class="ssbox" id="ssbox" hidden></div>
+    <p class="wnote lab" id="wnote"></p>
+    <div class="ssbox lab" id="ssbox" hidden></div>
 
     <div class="key">
       <div><span class="sw" style="background:var(--bar)"></span>원문에 직업으로 적힌 것</div>
@@ -527,10 +614,10 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
         <button type="button" data-m="praise" aria-pressed="false">칭찬 듣기</button>
       </span></div>
     <p class="advline" id="advline"></p>
-    <p class="advcap" id="advcap"></p>
+    <p class="advcap lab" id="advcap"></p>
   </div>
 
-  <section class="notes">
+  <section class="notes lab">
     <h3>어떻게 계산하나</h3>
     <ul>
       <li>네 기둥에 <b>가중치를 두지 않는다.</b> 년·월·일·시 모두 1점씩 동등하게 센다</li>
@@ -846,13 +933,17 @@ select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
   </section>
 </main>
 
-<footer>
+<footer class="lab">
   <div class="wrap">
     <p>자료 출처: <code>P:\sync\01.idea\saju-stats\docs\06-일주-해석-원본.md</code> · 유파·저자 미확인</p>
     <p>물상 그림은 별도 문서 「일주 물상 도해」 참조.</p>
     <p>이 페이지 소스 <code>tools/saju-job.html</code> · 편중 측정 <code>scripts/sim_bias.js</code>
        · 공식 비교 <code>scripts/sim_formula.js</code> — 측정 코드는 이 페이지에서 계산부를 직접 떼어다 쓴다.</p>
   </div>
+</footer>
+
+<footer class="litely">
+  <div class="wrap">🔮 재미로 보는 것 · 사주 해석은 유파마다 다릅니다</div>
 </footer>
 
 <script>
