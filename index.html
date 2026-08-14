@@ -321,6 +321,79 @@ footer p{margin:0 0 6px;max-width:76ch}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .notes .upd{border-left:3px solid var(--edge);padding:10px 0 10px 14px;margin-top:14px;color:var(--tx2)}
 .notes .upd b{color:var(--tx)}
+
+/* ─────────────────────────────────────────────────────────────
+   말랑 레이어 (2026-08-14)
+   색 토큰과 모양(radius·그림자·전이)만 덮는다.
+   마크업·클래스명·JS는 건드리지 않았으므로, 이 블록만 통째로 지우면
+   원래 화면으로 정확히 돌아온다.
+   ───────────────────────────────────────────────────────────── */
+:root{
+  --ink:#1E1826; --plate:#261F2F; --edge:#3A3145; --edge2:#4C4059;
+  --tx:#F2E8EF; --tx2:#C0AEBD; --tx3:#8E7E8C;
+  --mok:#8FD1A0; --hwa:#FF9BB0; --to:#F5C06A; --geum:#B3C6DA; --su:#8FA8F0;
+  --bg:#1E1826; --surface:#2A2233; --bar:#F7A8C0; --bar2:#6E5A72;
+  --r-lg:18px; --r-md:12px; --r-sm:9px;
+  --shadow:0 6px 20px rgba(0,0,0,.30);
+}
+/* 라이트 테마는 배경·테두리·분홍만 바꾼다.
+   목·토·금·수를 파스텔로 올렸더니 흰 배경 대비가 AA(4.5:1) 아래로 떨어져서
+   (목 3.5 · 토 3.4) 원본 값을 그대로 둔다. 이 색들은 본문 글자색으로도 쓰인다. */
+:root:not([data-theme="dark"]){
+  --ink:#FFF5F8; --plate:#FFFFFF; --edge:#F5DFD9; --edge2:#E4C6BE;
+  --tx:#3F3038; --tx2:#6E5A63; --tx3:#9C8A92;
+  --mok:#4F7A4A; --hwa:#C2385E; --to:#96682A; --geum:#5F707E; --su:#2F5A8C;
+  --bg:#FFF7F3; --surface:#FFFDFC; --bar:#C24568; --bar2:#F0AFC2;
+  --shadow:0 6px 18px rgba(194,69,104,.12);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#1E1826; --plate:#261F2F; --edge:#3A3145; --edge2:#4C4059;
+  --tx:#F2E8EF; --tx2:#C0AEBD; --tx3:#8E7E8C;
+  --mok:#8FD1A0; --hwa:#FF9BB0; --to:#F5C06A; --geum:#B3C6DA; --su:#8FA8F0;
+  --bg:#1E1826; --surface:#2A2233; --bar:#F7A8C0; --bar2:#6E5A72;
+  --shadow:0 6px 20px rgba(0,0,0,.30);
+}}
+:root[data-theme="dark"]{
+  --ink:#1E1826; --plate:#261F2F; --edge:#3A3145; --edge2:#4C4059;
+  --tx:#F2E8EF; --tx2:#C0AEBD; --tx3:#8E7E8C;
+  --mok:#8FD1A0; --hwa:#FF9BB0; --to:#F5C06A; --geum:#B3C6DA; --su:#8FA8F0;
+  --bg:#1E1826; --surface:#2A2233; --bar:#F7A8C0; --bar2:#6E5A72;
+  --shadow:0 6px 20px rgba(0,0,0,.30);
+}
+
+/* 배경에 아주 옅은 물방울 — 종이 질감 대신 */
+body{background-image:radial-gradient(var(--edge) 1px,transparent 1px);
+  background-size:26px 26px;background-attachment:fixed}
+
+/* 제목만 둥근 고딕 굵게. 사주 글자(갑자·을축…)는 명조 그대로 둔다 */
+h1{font-family:var(--font-b);font-weight:800;letter-spacing:-.025em}
+.eyebrow::before{content:"🔮 "}
+.panelhead h2::before{content:"· ";color:var(--bar)}
+
+/* 모서리 굴리기 */
+.panel{border-radius:var(--r-lg);box-shadow:var(--shadow);padding:22px}
+.mini,.iv,.badge,.ss,.jchip,.sst,.notes .upd{border-radius:var(--r-md)}
+.warn,.ssbox{border-radius:4px var(--r-md) var(--r-md) 4px}
+.row summary,.detail{border-radius:var(--r-md)}
+select{border-radius:var(--r-sm);padding:9px 10px}
+.track,.btrack{height:12px;border-radius:99px}
+.oh .ohb{height:8px}
+.cell{border-radius:3px}
+.iv{border-radius:var(--r-lg)}
+
+/* 말랑한 반응 */
+.iv,.jchip,.pref button,.mg button,.reroll,.badge,.slinks a{
+  transition:transform .14s ease,box-shadow .14s ease,border-color .14s ease}
+.iv:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.jchip:hover,.reroll:hover,.slinks a:hover{transform:translateY(-1px)}
+.pref button:hover,.mg button:hover{transform:scale(1.06)}
+.pref button[aria-pressed="true"],.mg button[aria-pressed="true"]{transform:none}
+.badge:hover{transform:translateY(-2px)}
+
+/* 초점 테두리도 말랑하게 */
+select:focus-visible,.jchip:focus-visible,.reroll:focus-visible,
+.pref button:focus-visible,.mg button:focus-visible,.row summary:focus-visible{
+  outline-width:3px;outline-offset:3px}
 </style>
 
 <header class="top">
