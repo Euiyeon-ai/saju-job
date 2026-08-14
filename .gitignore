@@ -1,0 +1,12 @@
+# 옵시디언이 이 폴더에 만드는 캐시
+.obsidian/
+.trash/
+
+# 편집기 · OS
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 로그 · 임시
+*.log
+node_modules/
