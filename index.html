@@ -492,7 +492,7 @@ body{line-height:1.7}
     </div>
 
     <p class="warn lab"><b>1등을 믿지 말 것.</b> 무작위 사주 3000개로 재보니
-      <b>94.7%</b>에서 설정을 바꾸면 1위가 바뀌었고, 한 사주가 평균 <b>3.5개</b>의 서로 다른 1위를 가졌다.
+      <b>94.8%</b>에서 설정을 바꾸면 1위가 바뀌었고, 한 사주가 평균 <b>3.5개</b>의 서로 다른 1위를 가졌다.
       이 페이지는 그 사실을 각주로 숨기지 않고 <b>순위표 위에 띄운다.</b>
       자료 자체도 유파·저자 미확인이고 <b>이건 통계 검정이 아니다</b> —
       검정은 <code>03-가설-사전등록.md</code> · <code>07-가설-추출.md</code>에서 따로 한다.</p>
@@ -535,7 +535,7 @@ body{line-height:1.7}
     <div id="srcout"></div>
   </div>
 
-  <div class="panel lab" id="stabpanel" hidden>
+  <div class="panel" id="stabpanel" hidden>
     <div class="panelhead"><h2>가장 자주 나온 결과</h2>
       <span class="hint">채점 방식을 128가지로 바꿔가며 돌린 뒤, 제일 많이 1등한 것</span></div>
     <div id="stabout"></div>
@@ -2088,7 +2088,7 @@ function renderStab(picks, list){
      </div>
      ${also.length?`<div class="band keep"><div class="bh">그다음으로 자주 1등한 것</div>
        <div class="bl2">${also.map(([c,v])=>`<span>${nice(c)}<i>${v}번</i></span>`).join('')}</div></div>`:''}
-     <details class="resdet"><summary>이 숫자가 어떻게 나왔나 — 그림으로 보기</summary>
+     <details class="resdet lab"><summary>이 숫자가 어떻게 나왔나 — 그림으로 보기</summary>
        <div class="resdetin">
          <p>사주 해석에는 <b>정답이 정해지지 않은 선택</b>이 여럿 있다 —
            어느 기둥을 더 중요하게 볼지, 십신을 넣을지, 흔한 직업을 깎을지 같은 것들이다.
@@ -2110,7 +2110,7 @@ function renderStab(picks, list){
          <div class="stabtop">
            <span class="badge ${cls}"><b>${Math.round(stab*100)}%</b><span class="bl">1등 유지율</span></span>
            <p>서로 다른 1등이 <b>${r1.length}종류</b> 나왔다. 이 유지율은 무작위 사주 중 <b>상위 ${topPct}%</b>다.
-              참고로 무작위 사주 3000개를 재보면 <b>94.7%</b>가 설정에 따라 1등이 바뀌고,
+              참고로 무작위 사주 3000개를 재보면 <b>94.8%</b>가 설정에 따라 1등이 바뀌고,
               한 사주가 평균 <b>3.5개</b>의 서로 다른 1등을 갖는다.</p>
          </div>
 
