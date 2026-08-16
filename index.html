@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>사주 직업 뽑기 🔮</title>
 <script>
   // 기본은 「가볍게 뽑아보는 앱」. 근거·민감도·계산 설명은 .lab 클래스로 묶어 감춘다.
@@ -310,6 +311,13 @@ select:focus-visible{outline:2px solid var(--su);outline-offset:1px}
   margin:0;max-width:60ch;text-wrap:pretty}
 .advcap{font-size:var(--f-xs);color:var(--tx3);margin:12px 0 0;max-width:70ch}
 .advcap b{color:var(--tx2)}
+/* 특이하고 재미있는 직업 — 지어낸 이름이라 순위표 색(var(--bar))을 쓰지 않는다 */
+.funname{display:block;font-family:var(--font-d);font-weight:400;
+  font-size:1.55rem;line-height:1.35;color:var(--to)}
+.funmore{display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+  margin-top:14px;font-family:var(--font-b);font-size:var(--f-xs);color:var(--tx3)}
+.funmore span{border:1px solid var(--edge2);border-radius:99px;padding:3px 11px;color:var(--tx2)}
+@media(max-width:640px){.funname{font-size:1.24rem}}
 @media(max-width:640px){.advline{font-size:1.12rem}}
 .notes{margin:30px 0 0}
 .notes h3{font-family:var(--font-d);font-weight:400;font-size:var(--f-lg);margin:0 0 8px}
@@ -612,7 +620,9 @@ body{line-height:1.7}
       <span class="mg advbtns" id="advbtns">
         <button type="button" data-m="advice" aria-pressed="false">조언 듣기</button>
         <button type="button" data-m="praise" aria-pressed="false">칭찬 듣기</button>
-      </span></div>
+        <button type="button" data-m="fun" aria-pressed="false">특이한 직업 듣기</button>
+      </span>
+      <button class="reroll" id="funroll" type="button" hidden>다른 직업 보기</button></div>
     <p class="advline" id="advline"></p>
     <p class="advcap lab" id="advcap"></p>
   </div>
@@ -696,6 +706,20 @@ body{line-height:1.7}
       카드에는 <b>「신흥 어휘」</b> · <b>「희귀 직능」</b> · <b>「디지털 매체」</b> 표시가 각각 붙는다.</p>
     <p><b>희귀도 매체도 직능에만 둔다.</b> 낯섦은 「무슨 일을 하느냐」에 있지 「무슨 분야냐」에 있지 않다.
       「음악 조율사」는 낯설지 않지만 「스포츠 오르간 정률사」는 낯설다 — 낯섦을 만드는 건 뒷말이다.</p>
+
+    <h3 style="margin-top:22px">「특이하고 재미있는 직업」은 위와 뭐가 다른가</h3>
+    <p>한마디 패널의 <b>「특이한 직업 듣기」</b>도 이름만 짓는 단계라는 점은 같다 —
+      순위·점수를 한 글자도 건드리지 않고, 1·2·3위 <b>범주만</b> 가져다 쓴다.
+      다른 점은 조합기가 분야+직능을 규칙으로 붙이는 데 비해 이쪽은
+      <b>손으로 쓴 구체적인 농담 목록</b>이라는 것이다.</p>
+    <p>규칙 조합으로는 「명예 야쿠르트 사원」이나 「벌에 자주 쏘이는 청년 양봉업자」가 안 나온다.
+      <b>웃긴 건 구체성에서 오고, 구체성은 생성이 안 된다</b> — 지명·상호·직급이 붙어야 하는데
+      그건 어휘 사전에 없는 정보다. 그래서 범주마다 10~12개씩 직접 적어두고,
+      절반쯤에만 수식어(<span class="src">국내 3등</span> · <span class="src">하루 3시간만 일하는</span>)를 붙인다.
+      전부 붙이면 리듬이 똑같아져서 덜 웃긴다.</p>
+    <p><b>이 출력은 원문 자료에서 가장 먼 곳에 있다.</b> 위 순위표는 그래도 「어느 칸에 뭐라고 적혀 있어서」를
+      댈 수 있지만, 이 이름들은 근거가 <b>내 농담</b>뿐이다. 그래서 재미로만 두고,
+      화면에도 지어낸 말이라고 적어둔다. 같은 사주 + 같은 관심도면 항상 같은 결과가 나온다.</p>
 
     <h3 style="margin-top:22px">작업 매체 — 원문이 침묵하는 축</h3>
     <p><b>원문 자료에는 매체 정보가 아예 없다.</b> 기축(갯벌·점토)에 「화가」라고만 적혀 있지
@@ -1882,6 +1906,7 @@ function renderAdvice(picks){
     NICKW ? `「${NICKW}」님을 위한 한마디` : '한마디';
   document.querySelectorAll('#advbtns button').forEach(b=>
     b.setAttribute('aria-pressed', String(b.dataset.m===ADVMODE)));
+  document.getElementById('funroll').hidden = ADVMODE!=='fun';
 
   if(!ADVMODE){
     document.getElementById('advhint').textContent='';
@@ -1891,6 +1916,8 @@ function renderAdvice(picks){
     return;
   }
   line.className='advline';
+
+  if(ADVMODE==='fun'){ renderFun(); return; }
 
   if(ADVMODE==='advice'){
     // 부족한 것 = 오행 중 가장 적은 것. 이 도구에서 결핍을 계산할 수 있는 유일한 축이다.
@@ -1943,6 +1970,149 @@ document.getElementById('advbtns').addEventListener('click',e=>{
   ADVMODE = ADVMODE===b.dataset.m ? null : b.dataset.m;
   if(ADVPICKS) renderAdvice(ADVPICKS);
 });
+
+// --- 특이하고 재미있는 직업 ---
+// 「직업 이름 조합기」와 같은 층이다: 순위가 다 정해진 뒤 **이름만** 짓는 단계라
+// 점수·순위를 한 글자도 건드리지 않는다. 다른 점은 조합기가 분야+직능을 규칙으로 붙이는 데 비해
+// 여기는 **손으로 쓴 구체적인 농담 목록**이라는 것이다. 규칙 조합으로는
+// 「명예 야쿠르트 사원」 같은 말이 안 나온다 — 웃긴 건 구체성에서 오고, 구체성은 생성이 안 된다.
+// 그래서 원문 자료와 가장 먼 출력이고, 캡션에 그렇게 적어둔다.
+//
+// 앞에 *가 붙은 항목은 **수식어를 안 붙인다.** 이미 수식어를 품고 있거나
+// (「벌에 자주 쏘이는 청년 양봉업자」) 사람 직함이 아니어서(「스펀지밥 주민」) 어색해지는 것들이다.
+const FUNMOD=["동네에서 소문난","은근히 유명한","하루 3시간만 일하는","주 4일만 나가는",
+  "말수 적은","자주 지각하는","국내 3등","명예","단골이 많은","전설의","퇴근이 빠른",
+  "의외로 인기 많은","별명이 세 개인","사진 잘 찍는","항상 배고픈","목소리 큰",
+  "걸음이 빠른","고양이 두 마리 키우는","웃음소리가 큰","이름을 아무도 못 외우는"];
+
+const FUNJ={
+ "정치·권력":["아파트 동대표 3선","학생회 예산 담당","구의원 보좌관","동네 반상회 사회자",
+   "아이돌 팬카페 운영진","축제 추진위원회 총무","마을 이장","재건축 조합 서기",
+   "협동조합 이사","총학 선거 참모"],
+ "법·질서":["소액사건 전문 변호사","층간소음 중재인","관리사무소 민원 담당","중고거래 사기 감별사",
+   "편의점 CCTV 판독원","게임 계정 분쟁 조정관","지하철 부정승차 단속원","저작권 신고 담당",
+   "반려견 놀이터 규칙 담당","주차 분쟁 조정 위원"],
+ "의료·구호":["동네 약국 약사","소아과 원장님","*스케일링 아프게 하는 치위생사","야간 응급실 간호사",
+   "산악 구조대 막내","헌혈의 집 상담 간호사","동물병원 마취 담당","침 잘 놓는 한의원 원장",
+   "119 상황실 접수 요원","요양원 물리치료사","프로야구팀 팀닥터"],
+ "방송·언론":["BBC 앵커","지역 라디오 새벽 DJ","홈쇼핑 쇼호스트","스포츠 중계 캐스터",
+   "날씨 예보 리포터","팟캐스트 편집자","시골 마을 소식지 기자","야구 하이라이트 편집자",
+   "지하철 안내방송 성우","유튜브 자막 담당"],
+ "연예·무대":["발레리나","뮤지컬 앙상블","마술쇼 조수","놀이공원 퍼레이드 댄서","아이돌 백업 댄서",
+   "지역 축제 사회자","인디 밴드 프론트맨","성우 지망생","코미디 클럽 오프너","무대 커튼 담당"],
+ "순수예술":["미술관 도슨트","벽화 그리는 화가","전시장 지킴이","도자기 물레 강사",
+   "캘리그래피 작가","판화 공방 주인","사찰 단청 보수공","조각 공원 관리인",
+   "초상화 그리는 노점 화가","미술 입시 학원 강사"],
+ "글쓰기·서사":["웹소설 연재 작가","게임 대사 번역가","자막 검수자","부고 기사 담당",
+   "*시집 내는 회사원","라면 회사 카피라이터","동화 구연 작가","서점 큐레이션 담당",
+   "아파트 안내문 쓰는 사람","팬픽 연재자"],
+ "음악·사운드":["*가야금 천재","*베이스 동호회 막내","*홍대 코인노래방 직원","결혼식 축가 가수",
+   "교회 반주자","피아노 조율사","지하철 버스킹 기타리스트","국악고 강사",
+   "게임 효과음 담당","성가대 지휘자","노래방 신곡 등록 담당"],
+ "영상·사진":["웨딩 스냅 작가","브이로그 편집자","드론 촬영 기사","증명사진관 사장",
+   "다큐 조연출","야생동물 촬영가","축구 중계 카메라 감독","반려동물 사진관 주인",
+   "필름 현상소 주인","졸업앨범 촬영 기사"],
+ "디자인·공예":["한복 렌탈샵 사장님","*반포 래미안 근처 뜨개방 주인","가죽 공방 주인","도장 파는 집 사장",
+   "네일 아트 디자이너","간판 글씨 쓰는 사람","인형 옷 만드는 사람","프라모델 도색 전문가",
+   "열쇠 복제하는 사람","향초 공방 주인","자수 놓는 청년"],
+ "소프트웨어·AI":["*사내 엑셀 매크로 담당","PC방 서버 관리자","학교 홈페이지 관리자","게임 버그 제보 전문가",
+   "지하철 시간표 앱 개발자","트위터 봇 만드는 사람","배달 앱 알고리즘 담당",
+   "*집에 서버 돌리는 직장인","오픈소스 문서 번역가","사주 계산기 만드는 개발자"],
+ "엔지니어링·제조":["말랑이 제조사","*전기에너지 관련 미친 박사님","놀이기구 안전 점검원","자판기 수리 기사",
+   "엘리베이터 검사원","아이스크림 기계 정비사","인쇄소 기계 담당","자동차 도색 기술자",
+   "로봇청소기 품질 검사원","불꽃놀이 화약 담당","발사체 배관 담당"],
+ "금융·상업":["*우도 땅콩 막걸리 도매업","*백화점 안 캐리어 매장 점원","새벽 도매시장 경매사","중고차 딜러",
+   "편의점 발주 담당","지역 은행 창구 직원","한정판 굿즈 리셀러","명절 선물세트 기획자",
+   "문구 도매상 사장","로또 명당 판매점 주인","골동품 감정사"],
+ "부동산·건설":["원룸촌 부동산 사장","타워크레인 기사","모델하우스 도우미","캠핑장 데크 짓는 사람",
+   "지하철 공사 감독","옥탑방 방수 시공자","인테리어 견적 담당","등기 서류 담당",
+   "놀이터 시설 설계자","한옥 짓는 목수"],
+ "학문·정보":["*몽골 유학생","도서관 야간 사서","고서 복원 연구원","향토사 연구자",
+   "*대학원 5년차","곤충 표본 관리사","기상 관측소 근무자","고인돌 발굴 조사원",
+   "위키 문서 편집자","사투리 채록 연구원"],
+ "상담·종교":["사주 봐주는 카페 주인","템플스테이 담당","심야 라디오 고민 상담자","진로 상담 선생님",
+   "명상 앱 목소리","타로 카페 사장","산사 스님","회사 고충처리 담당",
+   "반려동물 상실 상담사","새벽기도 인도자"],
+ "의례·죽음":["유품 정리사","반려동물 장례 지도사","결혼식 주례","상조회사 신입",
+   "납골당 관리인","제사상 차려주는 사람","돌잔치 진행자","묘비 글씨 새기는 사람",
+   "장례식장 육개장 담당","디지털 유산 정리 대행업"],
+ "교육":["*기니피그 유치원 선생님","수영 강습 코치","동네 보습학원 원장","운전면허 학원 강사",
+   "어린이 코딩 교실 선생님","노인정 스마트폰 강사","논술 첨삭 선생님","방과후 바둑 교실 강사",
+   "유치원 버스 인솔 교사","*대학 조교 3년차"],
+ "서비스·접객":["명동 에뛰드 나레이터","*하이디라오 면 댄스 직원","*명예 야쿠르트 사원",
+   "*파주 레터링 케이크 사장님","*연남동 오꼬노미야끼 청년사장","*스무디킹 에이스 직원",
+   "호텔 조식 담당","심야 만화카페 알바","백화점 주차 안내원","캠핑장 사장",
+   "동네 목욕탕 세신사","야시장 붕어빵 장수"],
+ "체육":["아쉬탕가 강사","*농구 치어리더 부단장","*삼성 라이온즈 구장 매니저",
+   "*한강 어린이풀 수영장 라이프가드","클라이밍장 루트 세터","학교 축구부 코치","볼링장 사장",
+   "마라톤 페이스메이커","씨름부 막내","e스포츠팀 분석관","실내 낚시터 관리인"],
+ "조직·행정":["동사무소 민원 담당","회사 총무팀 막내","학교 행정실 직원","축제 진행요원 팀장",
+   "아파트 관리소장","*회의록 잘 쓰는 대리","사내 동호회 총무","우체국 창구 직원",
+   "물류창고 재고 담당","학회 사무국 간사"],
+ "돌봄·생산":["*벌에 자주 쏘이는 청년 양봉업자","귀뚜라미 양식업자","*2대째 내려오는 포도밭 주인",
+   "딸기 농장 주인","표고버섯 재배자","도시 텃밭 관리자","동물원 사육사",
+   "유기견 보호소 활동가","김치 공장 반장","젖소 목장 후계자","수족관 산호 담당","누에 치는 농부"],
+ "여행·이동":["*카카오 벤티 택시기사","시골 마을버스 기사","등산로 해설사","크루즈 승무원",
+   "*배달 라이더 3년차","섬 여객선 항해사","야간열차 승무원","페리 매표소 직원",
+   "자전거 여행 가이드","항공사 지상직 직원","우주여행 상품 기획자"],
+ "기타":["*스펀지밥 주민","*텐동 중독자","무인도 자경단원","낮잠 품질 평가원",
+   "남의 반려동물 이름 지어주는 사람","편의점 신상 과자 시식가","게임 길드 마스터",
+   "지하철 노선도 수집가","우유갑 접기 장인","방 탈출 카페 힌트 담당"],
+};
+
+let FUNVAR=0;
+
+// 순위는 「직업 이름 조합기」와 같은 자료를 본다 — 관심도만 곱해 순서를 바꾼다.
+function funCats(){
+  if(!LAST||!LAST.list.length) return [];
+  return LAST.list
+    .map(([c,v])=>({c,adj:v.agree*MULT[String(PREF[c]??0)],raw:v.agree}))
+    .sort((a,b)=>b.adj-a.adj||b.raw-a.raw)
+    .slice(0,3).map(r=>r.c);
+}
+// 관형절이 두 번 겹치면(「하루 3시간만 일하는 자수 놓는 청년」) 말이 걸린다.
+// 직업 쪽에 이미 「~는」 절이 있으면 짧은 수식어만 쓴다.
+const FUNMOD_S=FUNMOD.filter(m=>!/[는은]$/.test(m));
+function funName(c,seed){
+  const bag=FUNJ[c]||FUNJ["기타"];
+  const raw=pick(bag,seed);
+  if(raw[0]==='*') return raw.slice(1);
+  // 다섯에 둘은 수식어 없이 둔다. 전부 붙이면 리듬이 똑같아져서 덜 웃기다.
+  if(seed%5>=3) return raw;
+  const mods=/[는은] /.test(raw)?FUNMOD_S:FUNMOD;
+  return pick(mods,seed*31+7)+' '+raw;
+}
+function renderFun(){
+  if(ADVMODE!=='fun') return;
+  const line=document.getElementById('advline'),
+        cap=document.getElementById('advcap'),
+        hint=document.getElementById('advhint');
+  const cats=funCats();
+  if(!cats.length){
+    hint.textContent='';
+    line.className='advline empty';
+    line.textContent='기둥을 고르면 뽑아준다.';
+    cap.innerHTML='';
+    return;
+  }
+  const h=hash(LAST.key+'fun')+FUNVAR*7919;
+  const names=cats.map((c,i)=>({c,n:funName(c,h+i*137)}));
+  line.className='advline';
+  // 캡션(.advcap)은 가벼운 모드에서 감춰지니, 「지어낸 말」이라는 표시는 힌트에도 둔다.
+  hint.textContent=`1위 범주 「${nice(cats[0])}」에서 뽑은 지어낸 이름`;
+  line.innerHTML=`<b class="funname">${names[0].n}</b>`+
+    (names.length>1
+      ? `<span class="funmore">이런 것도 있다${names.slice(1).map(x=>
+          `<span>${x.n}</span>`).join('')}</span>`
+      : '');
+  cap.innerHTML=
+    names.map((x,i)=>`${i+1}위 <b>${nice(x.c)}</b>`).join(' · ')+
+    ` 범주에서 하나씩 꺼냈다. <b>이 이름들은 전부 지어낸 농담이다</b> —
+     원문 자료에 없고, 점수·순위에도 영향을 주지 않는다.
+     범주만 순위에서 가져왔고 나머지는 재미로 붙인 말이다.
+     같은 사주 + 같은 관심도면 항상 같은 결과가 나온다.`;
+}
+document.getElementById('funroll').addEventListener('click',()=>{FUNVAR++;renderFun()});
 
 // --- 원문 직업어 ---
 // 이 도구에서 **가장 근거가 확실한 출력**이다. 범주 매핑이 개입하지 않았다 —
@@ -2152,7 +2322,7 @@ function pick(arr,n){return arr[n%arr.length]}
 
 function invent(){
   const ivp=document.getElementById('ivpanel');
-  if(!LAST||!LAST.list.length){ivp.hidden=true;return}
+  if(!LAST||!LAST.list.length){ivp.hidden=true;renderFun();return}
   const {list,tSort,key}=LAST;
 
   // 관심도를 곱해 다시 정렬한다. 자료 점수는 그대로 두고 순서만 바뀐다.
@@ -2238,6 +2408,7 @@ function invent(){
        </div>
      </div>`).join('');
   ivp.hidden=false;
+  renderFun();   // 순위가 바뀌면 농담 목록도 같이 다시 뽑는다
 }
 
 document.getElementById('reroll').addEventListener('click',()=>{variant++;invent()});
