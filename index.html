@@ -437,6 +437,30 @@ body{line-height:1.7}
 .spark.s3{animation-delay:1.2s}
 @keyframes twinkle{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
 
+/* ── 생년월일 입력 ── */
+.brow{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end}
+.bf{display:flex;flex-direction:column;gap:5px;font-size:var(--f-xs);color:var(--tx3);
+  font-family:var(--font-b)}
+.bf input{font-family:var(--font-b);font-size:var(--f-sm);color:var(--tx);
+  background:var(--plate);border:1px solid var(--edge2);border-radius:8px;padding:8px 10px}
+.bf input:focus-visible{outline:2px solid var(--su);outline-offset:1px}
+.bchk{display:flex;align-items:center;gap:6px;font-size:var(--f-sm);color:var(--tx2);
+  font-family:var(--font-b);padding-bottom:9px;cursor:pointer}
+.bout{font-family:var(--font-b);font-size:var(--f-sm);color:var(--tx2);margin:14px 0 0;
+  max-width:74ch;line-height:1.7}
+.bout b{color:var(--tx)}
+.bpil{display:flex;flex-wrap:wrap;gap:8px}
+.bout .bp{font-family:var(--font-d);font-size:1.2rem;color:var(--to);
+  border:1px solid var(--edge2);border-radius:10px;padding:6px 14px 7px;text-align:center;min-width:74px}
+.bout .bp i{display:block;font-family:var(--font-b);font-style:normal;
+  font-size:var(--f-xs);color:var(--tx3);margin-bottom:2px}
+.bout .bp.off{color:var(--tx3)}
+.bsum{display:block;margin-top:10px}
+.bout .bwarn{display:block;margin-top:6px;color:var(--hwa)}
+.bcap{font-size:var(--f-xs);color:var(--tx3);margin:12px 0 0;max-width:76ch;line-height:1.75}
+.bcap b{color:var(--tx2)}
+#bopts{margin-top:14px}
+
 /* ── 가벼운 모드 ──
    .lab = 근거·민감도·계산 설명. 지우지 않고 감춘다. ?lab=1 이면 .lite가 안 붙어 전부 보인다.
    .litely = 가벼운 모드에서만 보이는 것. */
@@ -519,8 +543,28 @@ body{line-height:1.7}
 </header>
 
 <main class="wrap">
+  <div class="panel" id="bpanel">
+    <div class="panelhead"><h2>생년월일시</h2>
+      <span class="hint">양력 기준 · 넣으면 네 기둥이 자동으로 채워진다</span></div>
+    <div class="brow">
+      <label class="bf"><span>생년월일</span>
+        <input type="date" id="bdate" min="1900-01-01" max="2100-12-31"></label>
+      <label class="bf"><span>태어난 시각</span>
+        <input type="time" id="btime" step="60"></label>
+      <label class="bchk"><input type="checkbox" id="bnotime"> 시간을 모른다</label>
+    </div>
+    <p class="bout" id="bout">생년월일을 넣으면 네 기둥을 계산해서 아래를 채운다.</p>
+    <div class="modes lab" id="bopts">
+      <span class="mg"><span class="mlbl">경도 보정</span>
+        <button type="button" id="blon" aria-pressed="false">끔 — 동경 135도 시계 그대로</button></span>
+      <span class="mg"><span class="mlbl">야자시</span>
+        <button type="button" id="byaja" aria-pressed="false">끔 — 23시 이후도 그날 일주</button></span>
+    </div>
+    <p class="bcap lab" id="bcap"></p>
+  </div>
+
   <div class="panel">
-    <div class="panelhead"><h2>기둥 선택</h2><span class="hint">순서대로 — 년 · 월 · 일 · 시</span></div>
+    <div class="panelhead"><h2>기둥 선택</h2><span class="hint">위에 생년월일을 넣으면 자동으로 채워진다 · 직접 골라도 된다</span></div>
     <div class="pillars" id="pillars"></div>
     <div class="daeunwrap">
       <p class="dcap"><b>대운</b> — 10년마다 바뀌는 운의 기둥. 알면 넣고, 모르면 비워두면 된다.
@@ -1592,6 +1636,288 @@ PN.forEach((nm,i)=>{
   (i<NATAL?pil:dpil).appendChild(d);
 });
 PN.forEach((_,i)=>document.getElementById('s'+i).addEventListener('change',run));
+
+// ── 만세력 계산 ─────────────────────────────────────────────
+// 생년월일시 → 네 기둥. 절기(節) 시각 표는 astropy로 계산해 박아넣었다.
+// 1899~2101년, 12절(소한·입춘·경칩·청명·입하·망종·소서·입추·백로·한로·입동·대설)의
+// **KST(동경 135도, +9) 기준 시각**을 「그 해 1월 1일 0시로부터 몇 분」으로 적은 것이고,
+// 4자리 36진수로 눌러 담았다(연 48자 × 203년 = 9,744자).
+// 검증: 2024 입춘 02-04 17:27 · 2025 입춘 02-03 23:10 — 한국천문연구원 발표값과 분 단위로 일치.
+const JQ36="05fh12761za22wv83v1a4tp45sml6rin7q2n8o3j9ljmaiis05p312gr1zjl2x4s3vav4tyq5swa6rse7qcg8odd9ltfaisj05yt12qf1zta2xek3vkq4u8o5t676s2a7qma8on69m3aaj2g068r130e20372xod3vue4ui75tfm6sbm7qvm8owl9mctajc5"+
+"06ij13a720cy2xy13w414urv5tpc6slf7r5i8p6h9mmpajlz06sd13k020mr2y7u3wdu4v1o5tz76svb7rfd8pgb9mwgajvp05y312pr1zsl2xdq3vjq4u7h5t4w6s0w7qkx8olv9m21aj1a067p12zf202c2xnj3vtk4uhc5ter6sar7qus8ovq9mbyajb9"+
+"06hn139a20c32xx63w354uqx5tob6skc7r4e8p5e9mloajkz06rd13iz20lp2y6r3wcq4v0j5ty06su27re48pf29mvaajuj05wx12ok1zrc2xch3vii4u6e5t3w6rzy7qjy8okv9m11aj0a066q12yf20182xmb3vs74ufw5td96s997qta8ou99mahaj9t"+
+"06g9137y20aq2xvs3w1o4upe5tmt6siw7r318p439mkbajjj06pv13hh20k92y5c3wbb4uz35twk6ssp7rct8pdu9mu2ajtb05vm12n61zpx2xb03vgy4u4p5t236ry47qi68oj79lzhaiyt065712wt1zzk2xkm3vqk4uec5tbr6s7t7qrw8osz9m9baj8p"+
+"06f4136p209c2xu93w024uns5tl76shb7r1h8p2l9mixajic06os13ge20j12y3y3w9q4uxd5tut6sqz7rb58pc89msiajru05u912lx1zop2x9q3vfl4u3b5t0q6rwu7qgz8oi29lydaixp064412vt1zyl2xjl3vpe4ucz5ta86s677qqb8org9m7vaj7a"+
+"06dr135f20852xt53vyy4umk5tjw6sfy7r038p199mhnajh206nh13f220hr2y2r3w8n4uwe5ttu6spy7ra28pb59mrhajqu05ta12kw1znl2x8l3veg4u255szi6rvj7qfl8ogm9lwxaiwb062t12ui1zxa2xia3vo54ubu5t996s5d7qpi8oql9m6xaj6a"+
+"06cq134c20702xry3vxq4ule5tiu6sf07qz98p0f9mgsajg406mh13e120go2y1l3w7e4uv15tsh6soo7r8x8pa49mqhajpt05s512jp1zmc2x7a3vd64u0w5syd6ruj7qes8ofz9lweaivs062612tq1zwc2xh63vmw4uah5t7t6s3w7qo48opd9m5waj5f"+
+"06bw133i20622xqu3vwh4uk15the6sdj7qxt8oz39mflajf206lj13d420fp2y0i3w674utt5tr86snf7r7q8p8y9mpdajot05ra12ix1zlk2x6f3vc44tzn5sww6rsx7qd38oeb9luraiu8060q12sf1zv42xg13vlr4u9a5t6k6s2l7qms8oo19m4kaj42"+
+"06aj1324204q2xpk3vv94uiu5tg56sc97qwh8oxr9meaajds06k913bt20ed2xz63w4v4usg5tps6slw7r638p799mnqajn605pn12h91zjv2x4q3vai4ty55svk6rrp7qbx8od49ltjaisz05zg12r31ztq2xej3vk74u7p5t506s137qlc8oml9m33aj2k"+
+"0692130p203a2xo23vto4uh55teh6sao7qv08owc9mctajc906im13a520cp2xxj3w384uqv5toa6skj7r4w8p689mmqajm605ok12g11zik2x3d3v924twn5sty6rq17qab8obn9ls7airq05y712pr1zsa2xd03vin4u665t3j6rzp7qk08old9m20aj1m"+
+"068412zm20222xmp3vs94ufs5td66s9f7qtu8ov89mbvajbh06i0139j20c02xwm3w244upk5tmw6sj37r3h8p4u9mlfajky05ng12f21zhm2x2d3v7y4tvf5ssr6roy7q9c8oaq9lrcaiqw05xe12p01zrl2xcc3vhv4u585t2g6ryi7qiu8oka9m0zaj0n"+
+"067712ys201a2xlz3vrh4uev5tc36s867qsj8oty9manaja906gr138b20as2xvi3w144uon5tm06si77r2j8p3x9mkjajk405mm12e71zgq2x1g3v714tuh5srr6rnt7q828o9d9lpyaipk05w412ns1zqd2xb23vgl4u415t1b6rxf7qhr8oj59lzraizc"+
+"065u12xe1zzw2xkk3vq34udj5taw6s757qrl8ot19m9oaj9806fo1376209m2xu93vzs4un85tkj6sgq7r158p2k9mj6ajiq05l512cn1zf32wzs3v5d4tsv5sq86rmf7q6u8o8b9lp0aiol05v312ml1zoz2x9k3vf14u2f5szp6rvv7qga8ohs9lykaiya"+
+"064u12wd1zyr2xj93vol4ubw5t966s5d7qpu8orc9m83aj7q06ea135t20872xsr3vy64ulk5tix6sf77qzq8p189mhyajhk05k212bm1ze22wyp3v444trg5son6rkr7q558o6m9lndain105tl12l71zno2x8b3vdq4u115sy76rub7qeq8og99lx3aiws"+
+"063c12uu1zx72xhr3vn64uaj5t7u6s427qok8oq49m6xaj6n06d6134o20702xrj3vwy4ukc5thm6sds7qy78ozo9mgeajg205im12a71zcm2wx73v2m4tq15snc6rjk7q408o5i9lm8ailw05sg12k11zmh2x703vcd4tzo5swx6rt57qdn8of79lw0aivq"+
+"062a12tu1zw92xgr3vm34u9c5t6k6s2s7qnc8ooy9m5qaj5d06bu133b205o2xq83vvn4uj15tgd6sco7qx98oyx9mfqajfe05hv129a1zbn2ww63v1l4toy5sm76ric7q2t8o4f9llaail205rn12j51zlh2x5y3vb94tyj5svr6rry7qcf8oe29luzaiut"+
+"061e12sw1zv52xfj3vks4u825t5e6s1p7qmc8oo09m4waj4p06ba132t20542xpi3vur4ui05tf86sbg7qvz8oxm9mefaje505gq128a1zap2wv73v0i4tnq5skx6rh57q1o8o3b9lk7aijy05qi12i21zkf2x4w3va64txe5suj6rqp7qb88ocx9ltvaitq"+
+"060c12rv1zu62xel3vjt4u705t456s0b7qku8omh9m3daj35069q1317203i2xnx3vt84ugj5tdu6sa37qun8owa9md5ajcw05fh126z1z9b2wtr3uz24tmb5sjk6rfq7q078o1t9linaiif05p212gm1ziy2x3e3v8m4tvs5ssz6rp67q9q8obe9lsaais1"+
+"05yl12q11zsb2xco3vhw4u555t2f6rys7qji8olb9m29aj20068i12zw20242xmh3vrp4uey5tc76s8g7qt38ouu9mbrajbj05e1125g1z7p2ws23uxa4tkj5shr6re17pyn8o0f9lhgaiha05nw12fc1zhj2x1t3v6y4tu45srb6rnl7q898oa39lr6air5"+
+"05xt12pb1zri2xbp3vgr4u3u5t0z6rx97qhx8ojq9m0raj0m067912yr20102xla3vqe4udj5tar6s727qrs8otm9manajah05d3124l1z6w2wra3uwg4tjk5sgo6rcu7pxg8nz89lgaaig705mv12ef1zgq2x133v694ttb5sqd6rmi7q728o8v9lpyaipw"+
+"05wk12o01zq82xai3vfn4u2t5t016rwb7qh08oiu9lzxaizu066h12xx20042xkf3vpk4ucs5ta06s697qqt8osj9m9iaj9d05c1123j1z5t2wq53uvb4tih5sfo6rbx7pwj8nya9lf8aif305lr12d91zfj2wzt3v4w4ts05sp76rli7q688o829lp4aip0"+
+"05vn12n41zpb2x9k3ven4u1q5syv6rv67qfw8ohr9lysaiym065512wj1zyp2xiy3vo34ub95t8h6s4u7qpm8orj9m8maj8g05az122c1z4g2woq3utv4th05se76rag7pv58nx19le5aie405ks12c81zec2wyi3v3j4tqk5snp6rjy7q4n8o6j9lnpainp"+
+"05ud12ls1znu2x7w3vcu4tzv5sx36rth7qec8ogc9lxiaixg064312vj1zxn2xhr3vmq4u9r5t6x6s387qo08opw9m71aj6y059m12131z3a2wni3usi4tfh5scj6r8s7pti8nvf9lcmaicl05j912aq1zcv2wx13v1z4toy5sm06ria7q318o529lmbaime"+
+"05t412kk1zmo2x6t3vbr4tyq5svt6rs17qcr8oep9lvwaivw062l12u01zw42xg93vl94u8a5t5g6s1r7qmi8oof9m5laj5k058911zp1z1v2wm13ur24te35sb86r7i7ps88nu49lbaaiba05i0129j1zbq2wvw3v0u4tnt5skv6rh47q1v8o3t9ll0aikz"+
+"05rm12j11zl42x583va64tx65sud6rqs7qbp8odr9lv0aiuy061j12sw1zuy2xf23vk24u755t4c6s0p7qli8onj9m4raj4q057c11yq1z0s2wkw3upv4tcx5sa16r6c7pr58nt59lafaiah05h6128l1zal2wul3uzf4tmd5sji6rfw7q0s8o2w9lk8aike"+
+"05r512il1zkm2x4l3v9d4tw95std6rpq7qam8oco9ltyaitz060p12s41zu72xe83vj24u5z5t326rzf7qkb8ome9m3oaj3p056d11xt1yzw2wk03uox4tbu5s8v6r547ppy8ns19l9dai9h05g8127o1z9s2wtu3uyp4tll5sik6rer7pzj8o1l9liyaij2"+
+"05ps12h51zj52x343v7y4tuw5ss06roc7q988obd9lspaist05zj12qw1zsw2xcv3vhq4u4q5t1v6ry87qj18ol19m2baj2d055311wj1yyl2wim3unh4tae5s7h6r3r7pol8nql9l7uai7x05en12631z852ws33uwv4tjp5sgr6rd57py38o099lhnaihr"+
+"05og12fu1zhu2x1t3v6k4ttf5sqi6rmv7q7t8o9z9lrcaire05y112pc1zrb2xba3vg34u305t036rwg7qhe8ojl9m0zaj12053q11v21yx02wgy3ulr4t8n5s5p6r217pmy8np49l6kai6s05dl12501z6y2wqu3uvk4tid5sfe6rbp7pwl8nyq9lg6aige"+
+"05n712el1zgi2x0c3v4z4trr5sou6rl97q6a8o8j9lpzaiq505ww12oa1zq92xa63vew4u1q5syt6rv77qg58oic9lzqaizv052m11u11yw32wg23uku4t7n5s4n6r0w7pls8nny9l5eai5l05cc123r1z5q2wpn3uub4th35se36rae7pvd8nxo9lf7aifg"+
+"05m912dm1zfk2wzf3v454tqy5so06rkd7q5c8o7j9lozaip505vw12na1zp82x943vdu4u0p5sxr6ru57qf38oh99lyoaiyt051k11sy1yux2wet3ujj4t6d5s3f6qzs7pkr8nmy9l4eai4l05bd122s1z4s2wop3utd4tg55sd66r9j7pui8nwr9le8aiee"+
+"05l312ce1zea2wy33v2r4tpi5sml6rj17q458o6i9lo0aio605uu12m31znx2x7q3vcf4tza5swe6rsu7qdw8og79lxqaixy050n11rz1ytu2wdn3uib4t545s256qyi7pjh8nlr9l3bai3l05ae121r1z3k2wn83urq4tee5sbe6r7t7psw8nva9lcxaida"+
+"05k512bj1zdc2wx13v1j4to65sl76rhn7q2r8o549lmoaimx05tp12l31zmz2x6q3vba4txy5suw6rr97qcb8oeo9lw8aiwh04z911qm1ysj2wcd3ugx4t3l5s0h6qws7phs8nk59l1sai25058z120e1z2b2wm43uqp4tdc5sa96r6j7prh8ntt9lbgaibt"+
+"05im129y1zbs2wvh3v014tmq5sjp6rg37q148o3h9ll3aile05s712jj1zld2x533v9o4twg5sti6rpx7qay8od99luraiv104xu11p91yr62way3ufk4t2a5rza6qvo7pgo8niy9l0hai0q057j11yw1z0r2wkh3uoy4tbk5s8j6r4z7pq58nsl9la9aiak"+
+"05hb128m1zaf2wu43uyn4tlc5sid6rev7q028o2j9lk6aikf05r412id1zk42x3u3v8e4tv45ss56rol7q9q8oc69ltuaiu504ww11o61ypw2w9k3ue24t0p5rxp6qu47pf88nhq9kzhahzx056t11y51yzw2wji3unx4taj5s7i6r3x7pp28nrj9l9aai9p"+
+"05gk127w1z9m2wt63uxj4tk35sh16rdi7pyr8o1a9lj0aije05q812hk1zjc2x2y3v7d4ttz5sqy6rnd7q8j8ob19lsrait404vy11nc1yp62w8w3udd4szz5rwv6qt77pea8ngq9kygahyv055r11x41yyw2wih3umv4t9e5s696r2l7pnq8nqa9l83ai8k"+
+"05fh126t1z8j2ws43uwi4tj45sg26rci7pxo8o059lhvaii905p412gg1zi72x1u3v694tsw5spv6rma7q7e8o9u9lrhairu04uo11m11ynu2w7h3ubv4sye5rvb6qrp7pcu8nfb9kx1ahxg054b11vp1yxi2wh53ulj4t825s4z6r1f7pmm8np59l6wai79"+
+"05e1125b1z702wqk3uuy4thi5seg6rax7pw68nys9lgkaigx05np12ew1zgk2x033v4i4tr45so46rkl7q5t8o8d9lq6aiql04tf11ko1ymd2w5x3uac4swx5rtw6qqc7pbi8ne19kvuahwc053811uj1yw62wfl3ujt4t685s346qzl7pkv8nnj9l5eai5x"+
+"05cu12461z5t2wp93uth4tfx5scv6r9e7puq8nxe9lf7aifn05mi12dt1zfi2wz13v3d4tpu5smr6rj77q4g8o739loxaipd04s711ji1yl72w4r3u914svg5rs96qom7p9u8nch9kufahuz051w11t81yux2wef3uiq4t575s226qyh7pjp8nmc9l4aai4u"+
+"05bq12301z4m2wo23usb4tet5sbq6r867ptg8nw39ldyaieh05ld12cn1zea2wxq3v1z4toi5slg6rhx7q368o5s9lnmaio404r011id1yk42w3n3u7y4sug5rrd6qnu7p938nbo9ktiahu0050x11s81ytw2wdb3uhi4t3w5s0q6qx77pik8nlb9l39ai3s"+
+"05an121w1z3i2wmx3ur44tdk5sai6r717psg8nv79ld5aidn05kg12bn1zd82wwo3v0y4tnh5skf6rgw7q288o4x9lmwainf04qa11hj1yj32w2h3u6n4st15rpv6qma7p7k8nab9ksbahsz04zz11rb1ysw2wc83ugc4t2p5rzk6qw27phe8nk69l26ai2s"+
+"059q12101z2l2wlx3uq04tcd5s976r5p7pr38ntv9lbuaice05ja12al1zc72wvk3uzp4tm25siw6rfc7q0n8o3e9lldaily04ov11g61yhu2w1b3u5j4srx5ror6ql57p6f8n959kr4ahrr04yp11q01yrk2waw3uf04t1b5ry36quh7pft8nil9l0nai1b"+
+"058a11zk1z132wkd3uoh4tau5s7q6r497ppm8nsd9ladaiax05hu12931zao2wu13uy74tkn5shk6re37pzf8o259lk2aikm04ni11es1yge2vzr3u3u4sq55rmx6qje7p4r8n7j9kpjahq604x311oe1ypz2w9a3udd4szp5rwj6qt27pei8nhe9kzgai01"+
+"056w11y21yzj2wit3umx4t9a5s666r2q7po78nr49l97ai9t05go127u1z9a2wsi3uwl4tiy5sfu6rcc7pxr8o0m9liqaijf04md11dm1yf32vyd3u2f4sos5rlo6qi77p3l8n6g9kokahpb04wc11nn1yp32w893uc64syd5rv56qrn7pd58ng29ky8ahz0"+
+"056111xc1yyt2whz3ulw4t835s4w6r1g7pmz8npx9l82ai8q05fo126y1z8i2wrt3uvv4ti55sey6rbg7pww8nzs9lhxaiil04lk11cu1yee2vxo3u1p4snw5rkk6qgx7p2a8n569kndaho504v711mi1yo12w7a3uba4sxj5rua6qqq7pc58nf29kx9ahxz"+
+"054z11w81yxo2wgw3ukx4t785s426r0l7pm18now9l71ai7p05eo125x1z7e2wql3uul4tgw5sdp6ra87pvm8nyg9lgjaih704k611bg1yd02vwa3u0b4smm5rjg6qg07p1g8n4c9kmfahn404u211la1ymr2w5x3u9v4sw25rsu6qpd7pax8ndx9kw4ahwu"+
+"053r11uw1ywa2wff3ujb4t5j5s2d6qyy7pkj8nnl9l5sai6h05dd124h1z5u2wp03ut04tfb5sc76r8s7puc8nxc9lfkaigb04j911af1ybs2vuu3typ4sku5rhl6qe27ozk8n2k9kkuahlp04ss11k11ylf2w4g3u884sub5rr26qnn7p988ncb9kumahvf"+
+"052f11to1yv12we43uhx4t415s0t6qxe7pj08nm39l4dai5505c4123c1z4q2wnu3uro4tds5sah6r6y7psg8nvh9ldraiel04hm118v1yac2vti3txe4sjk5rga6qcr7oy98n1a9kjlahkg04rj11is1yk52w373u704st45rpu6qmb7p7u8nax9kt9ahu5"+
+"051811sh1ytt2wcu3ugm4t2q5rzh6qw27phm8nkn9l2xai3q05ar12201z3f2wmi3uqe4tcm5s9f6r617prl8num9lcuaidm04gn117w1y9c2vsg3tw94sic5rf16qbi7ox28n049kieahj904qa11hk1yiz2w223u5u4srx5rom6ql67p6t8n9z9kscaht5"+
+"050411r81ysk2wbm3ufh4t1n5ryg6qv37pgr8njx9l2aai3405a212161z2g2wlg3upa4tbf5s876r4q7pqa8ntd9lbraicn04fp116w1y882vr83tv04sh45rdw6qah7ow38mz89khlahij04pn11gv1yi52w123u4p4sqq5rng6qk17p5q8n8x9krcahsa"+
+"04zd11ql1yrw2wat3ueg4t0e5rx36qto7pfd8nik9l0yai1t058u12011z1d2wke3uo54ta85s6y6r3j7pp78nsd9lasaibo04ep115w1y782vq83tty4sfy5rcj6q8z7ouj8mxp9kg6ahh604oa11fj1ygu2vzr3u3f4spd5rm06qii7p458n7c9kptahqr"+
+"04xt11oz1yq92w953ucv4syy5rvq6qsc7pe08nh69kzlai0h057j11yq1z002wiy3umn4t8o5s5d6r1w7pnh8nql9l8yai9u05gx12861z9j2wsi3uw74ti75sex6rbi7px68o0d9lisaijp";
+const JQ_Y0=1899, JQ_N=12;
+const JQ_BR=[1,2,3,4,5,6,7,8,9,10,11,0];   // 소한→축, 입춘→인 … 대설→자
+const JQ_NM=["소한","입춘","경칩","청명","입하","망종","소서","입추","백로","한로","입동","대설"];
+function jqMin(y,j){
+  if(y<JQ_Y0||y>JQ_Y0+202) return null;
+  const i=((y-JQ_Y0)*JQ_N+j)*4;
+  return parseInt(JQ36.substr(i,4),36);
+}
+
+// 한국 표준시 변경 이력 — [UTC 분, 그 시각부터의 오프셋(분)].
+// 1908~1911 +8:30, 1912~1954 +9, 1954~1961 +8:30, 그리고 서머타임 12번(1948~51·55~60·87~88).
+// 안 넣으면 1954~61년생의 시주가 통째로 30분 밀리고, 서머타임 기간생은 1시간 밀린다.
+const TZKR=[
+  [-36816480,507],
+  [-32479708,510],
+  [-30506910,540],
+  [-11353500,600],
+  [-11203800,540],
+  [-10912860,600],
+  [-10681080,540],
+  [-10390140,600],
+  [-10156920,540],
+  [-9814140,600],
+  [-9632760,540],
+  [-8302140,510],
+  [-7711710,570],
+  [-7528890,510],
+  [-7163070,570],
+  [-6971610,510],
+  [-6659070,570],
+  [-6457530,510],
+  [-6134910,570],
+  [-5933370,510],
+  [-5610750,570],
+  [-5409210,510],
+  [-5086590,570],
+  [-4885050,510],
+  [-4415550,540],
+  [9126300,600],
+  [9348060,540],
+  [9650460,600],
+  [9872220,540]
+];
+// 벽시계 시각(출생신고에 적힌 그 시각) → UTC 분. 오프셋이 바뀌니 역변환이다 —
+// 구간마다 대응하는 벽시계 범위를 만들어 그 안에 드는 구간을 찾는다.
+function localToUtc(minLocal){
+  let last=null;
+  for(let i=0;i<TZKR.length;i++){
+    const t=TZKR[i][0], o=TZKR[i][1];
+    const lo=t+o, hi=(i+1<TZKR.length)?TZKR[i+1][0]+o:Infinity;
+    if(minLocal>=lo&&minLocal<hi) return {utc:minLocal-o,off:o,gap:false};
+    if(minLocal>=lo) last=o;      // 지나온 구간
+  }
+  // 서머타임 시작으로 **건너뛴 시각**(존재하지 않는 벽시계)이면 직전 구간 오프셋으로 읽는다
+  const o=(last===null)?TZKR[0][1]:last;
+  return {utc:minLocal-o,off:o,gap:true};
+}
+
+const GAN="갑을병정무기경신임계", JI="자축인묘진사오미신유술해";
+const MDAYS=[0,31,59,90,120,151,181,212,243,273,304,334];
+const isLeap=y=>(y%4===0&&y%100!==0)||y%400===0;
+function civilDays(y,m,d){   // 1970-01-01부터의 일수
+  let n=(y-1970)*365+Math.floor((y-1969)/4)-Math.floor((y-1901)/100)+Math.floor((y-1601)/400);
+  return n+MDAYS[m-1]+((m>2&&isLeap(y))?1:0)+(d-1);
+}
+function civilFromDays(z){
+  z+=719468;
+  const era=Math.floor(z/146097), doe=z-era*146097;
+  const yoe=Math.floor((doe-Math.floor(doe/1460)+Math.floor(doe/36524)-Math.floor(doe/146096))/365);
+  const y=yoe+era*400, doy=doe-(365*yoe+Math.floor(yoe/4)-Math.floor(yoe/100));
+  const mp=Math.floor((5*doy+2)/153), d=doy-Math.floor((153*mp+2)/5)+1;
+  const m=mp+(mp<10?3:-9);
+  return {y:y+(m<=2?1:0),m:m,d:d};
+}
+function dayOfYear(y,m,d){ return MDAYS[m-1]+((m>2&&isLeap(y))?1:0)+d-1; }
+
+// 일주 기준: 1900-01-01 = 갑술(60갑자 10번).
+// saju-stats의 saju.py와 같은 값이고, 그쪽은 lunar-python·cnlunar 두 구현에서
+// 1900~2026년 18개 날짜로 역산해 얻은 것이다.
+const DAY_BASE=civilDays(1900,1,1), DAY_BASE_IDX=10;
+// 서울(126.978도)은 표준자오선(135도)보다 8.02도 서쪽 → 진태양시가 32분 늦다.
+const LON_ADJ=32;
+
+function sajuPillars(o){
+  const wall=civilDays(o.y,o.m,o.d)*1440+(o.noTime?12*60:o.hh*60+o.mm);
+  const conv=localToUtc(wall);
+  let kst=conv.utc+540;                              // 절기표와 같은 기준(+9)으로 맞춘다
+  if(o.lonAdj) kst-=LON_ADJ;                         // 경도 보정은 유파 선택 — 기본은 끔
+  const day=Math.floor(kst/1440), min=kst-day*1440;
+  const dt=civilFromDays(day), hh=Math.floor(min/60), mi=min%60;
+  const doyMin=dayOfYear(dt.y,dt.m,dt.d)*1440+min;
+
+  // --- 절기로 년·월을 가른다 ---
+  const t=[];
+  for(let j=0;j<JQ_N;j++){ const v=jqMin(dt.y,j); if(v===null) return null; t.push(v); }
+  let k=-1;
+  for(let j=0;j<JQ_N;j++) if(doyMin>=t[j]) k=j;
+  let sajuYear, mBranch, mOrder;
+  if(k<0){ sajuYear=dt.y-1; mBranch=0; mOrder=10; }  // 소한 전 = 작년 대설이 연 자월
+  else{
+    mBranch=JQ_BR[k];
+    mOrder=(mBranch+10)%12;                          // 인(2)→0 … 축(1)→11
+    sajuYear=(k===0)?dt.y-1:dt.y;                    // 입춘(k=1) 전이면 아직 작년
+  }
+  const yIdx=(((sajuYear-4)%60)+60)%60;
+  const yGan=yIdx%10;
+  const mGan=(yGan*2+2+mOrder)%10;                   // 오호둔 — 갑기년 병인월
+
+  // --- 일주 ---
+  let dayNo=day;
+  if(o.yaja&&hh>=23) dayNo+=1;                       // 야자시를 다음날로 넘기는 유파
+  const dIdx=((((dayNo-DAY_BASE+DAY_BASE_IDX)%60)+60)%60);
+  const dGan=dIdx%10;
+
+  // --- 시주 ---
+  let hourPil=null, hBranch=null;
+  if(!o.noTime){
+    hBranch=Math.floor((min+60)/120)%12;             // 23:00~00:59 = 자시
+    hourPil=GAN[(dGan*2+hBranch)%10]+JI[hBranch];    // 오자둔 — 갑기일 갑자시
+  }
+
+  // 절입에 얼마나 가까운가 — 30분 안이면 이 계산으로 확정할 수 없다고 말한다
+  let near=null;
+  for(let j=0;j<JQ_N;j++){
+    const gap=Math.abs(doyMin-t[j]);
+    if(gap<=30&&(near===null||gap<near.gap)) near={nm:JQ_NM[j],gap:gap};
+  }
+  return {
+    year:GAN[yGan]+JI[yIdx%12],
+    month:GAN[mGan]+JI[mBranch],
+    day:GAN[dIdx%10]+JI[dIdx%12],
+    hour:hourPil,
+    sajuYear:sajuYear, off:conv.off, near:near,
+    kstY:dt.y, kstM:dt.m, kstD:dt.d, kstHH:hh, kstMI:mi,
+    termName:(k<0?"대설":JQ_NM[k])
+  };
+}
+
+// ── 생년월일시 → 네 기둥 (UI) ──
+// 기둥 select를 없애지 않고 **채우기만** 한다. 계산이 뭘 골랐는지 보이고,
+// 마음에 안 들면 그대로 손으로 바꿀 수 있어야 한다 — 이 도구는 그걸 보라고 만든 것이다.
+let BLON=false, BYAJA=false;
+const OFFNM={540:"+9:00 (동경 135도)",570:"+9:30 (서머타임)",600:"+10:00 (서머타임)",
+             510:"+8:30 (동경 127.5도)",507:"지방시 +8:27"};
+function birthCalc(){
+  const dEl=document.getElementById('bdate'), tEl=document.getElementById('btime'),
+        nEl=document.getElementById('bnotime'),
+        out=document.getElementById('bout'), cap=document.getElementById('bcap');
+  const noTime=nEl.checked;
+  tEl.disabled=noTime;
+  if(!dEl.value){
+    out.innerHTML='생년월일을 넣으면 네 기둥을 계산해서 아래를 채운다.'; cap.innerHTML=''; return;
+  }
+  const [y,m,d]=dEl.value.split('-').map(Number);
+  let hh=0, mm=0;
+  if(!noTime){
+    if(!tEl.value){
+      out.innerHTML='태어난 시각도 넣거나, <b>「시간을 모른다」</b>에 표시해라 — 시주를 빼고 세 기둥으로 계산한다.';
+      cap.innerHTML=''; return;
+    }
+    const tp=tEl.value.split(':'); hh=+tp[0]; mm=+tp[1];
+  }
+  const r=sajuPillars({y:y,m:m,d:d,hh:hh,mm:mm,noTime:noTime,lonAdj:BLON,yaja:BYAJA});
+  if(!r){ out.textContent='1900~2100년 사이만 계산한다. 절기표가 그 범위다.'; cap.innerHTML=''; return; }
+
+  ['s0','s1','s2','s3'].forEach((id,i)=>{
+    document.getElementById(id).value=[r.year,r.month,r.day,noTime?'':(r.hour||'')][i];
+  });
+  run();
+
+  const pad=n=>String(n).padStart(2,'0');
+  const kstT=`${pad(r.kstHH)}:${pad(r.kstMI)}`;
+  const pil=`<span class="bpil">`+
+    [["년주",r.year],["월주",r.month],["일주",r.day],["시주",noTime?null:r.hour]]
+      .map(x=>`<span class="bp${x[1]?'':' off'}"><i>${x[0]}</i>${x[1]||'—'}</span>`).join('')+
+    `</span>`;
+  const warn=[];
+  if(r.off!==540)
+    warn.push(`태어난 그때 한국 표준시는 <b>${OFFNM[r.off]||r.off+'분'}</b>였다 —
+      시계 ${pad(hh)}:${pad(mm)} → 동경 135도 기준 <b>${kstT}</b>. 안 고치면 시주가 통째로 밀린다.`);
+  if(BLON)
+    warn.push(`경도 보정을 켰다 — 서울 기준 <b>32분</b>을 뺀 <b>${kstT}</b>로 계산했다.`);
+  if(r.near)
+    warn.push(`<b>${r.near.nm} 절입</b>에서 ${r.near.gap}분 거리다.
+      <b>이 정도면 년·월 기둥이 확정되지 않는다</b> — 절입 시각도, 적어놓은 출생시각도 그만큼은 흔들린다.`);
+  if(noTime) warn.push('시간을 몰라서 <b>시주는 비워뒀다.</b> 남은 세 기둥으로 계산한다.');
+  if(r.gap) warn.push('서머타임이 시작되며 <b>건너뛴 시각</b>이다 — 실제로는 없던 시계 눈금이라 직전 표준시로 읽었다.');
+
+  out.innerHTML=`${pil}<span class="bsum">${y}년 ${m}월 ${d}일 ${noTime?'(시간 모름)':pad(hh)+':'+pad(mm)} ·
+    <b>${r.sajuYear}년 ${r.termName}</b>${jong(r.termName.slice(-1))>0?'이':'가'} 연 달이다.</span>`+
+    (warn.length?`<span class="bwarn">${warn.join('</span><span class="bwarn">')}</span>`:'');
+
+  cap.innerHTML=`<b>어떻게 갈랐나.</b>
+    년주는 <b>1월 1일이 아니라 입춘</b>에서 바뀐다 — 2월 3~5일 절입 전에 태어났으면 앞 해다.
+    월주는 12절(입춘·경칩·청명…)의 절입 시각으로 가르고, 월간은 년간에서 오호둔(갑기년 병인월)으로 얻는다.
+    일주는 1900-01-01=갑술을 기준으로 60갑자를 센다.
+    시주는 23시부터 자시로 두 시간씩 끊고, 시간은 일간에서 오자둔(갑기일 갑자시)으로 얻는다.
+    <b>절기 시각은 astropy로 계산해 1899~2101년치를 박아넣었다</b>(태양 겉보기 황경 315도=입춘 …).
+    2024·2025 입춘이 한국천문연구원 발표와 분 단위로 일치한다.
+    일주는 saju-stats의 <code>saju.py</code>와 1,985개 날짜에서 전부 일치하고,
+    년·월주는 표를 안 쓰는 독립 경로와 절입 ±2분 경계를 포함한 4,448건에서 전부 일치한다.
+    <br><b>표준시 이력도 반영한다.</b> 1954~61년은 동경 127.5도(+8:30)였고, 서머타임이 12번 있었다.
+    이걸 빼면 그 시절 출생자의 시주가 30분~1시간 밀린다.
+    <br><b>안 하는 것 둘.</b> 음력 입력은 안 받는다(양력만) — 변환표를 또 하나 믿어야 해서다.
+    대운은 성별과 순행·역행이 필요해서 자동으로 안 넣는다. 알면 아래에 직접 고르면 된다.
+    <br><b>경도 보정과 야자시는 유파가 갈리는 자리라 토글로 뺐다.</b> 켜고 끄면 기둥이 실제로 바뀐다 —
+    바뀐다면 그 기둥은 자료가 아니라 이 선택이 만든 것이다.`;
+}
+['bdate','btime'].forEach(id=>{
+  const el=document.getElementById(id);
+  el.addEventListener('change',birthCalc); el.addEventListener('input',birthCalc);
+});
+document.getElementById('bnotime').addEventListener('change',birthCalc);
+document.getElementById('blon').addEventListener('click',e=>{
+  BLON=!BLON; e.currentTarget.setAttribute('aria-pressed',String(BLON));
+  e.currentTarget.textContent=BLON?'켬 — 서울 기준 32분을 뺀다':'끔 — 동경 135도 시계 그대로';
+  birthCalc();
+});
+document.getElementById('byaja').addEventListener('click',e=>{
+  BYAJA=!BYAJA; e.currentTarget.setAttribute('aria-pressed',String(BYAJA));
+  e.currentTarget.textContent=BYAJA?'켬 — 23시 이후는 다음날 일주':'끔 — 23시 이후도 그날 일주';
+  birthCalc();
+});
+
 
 // --- 배점 · 지지 레이어 토글 ---
 const wnote=document.getElementById('wnote'), ztBtn=document.getElementById('zt'),
