@@ -2325,7 +2325,7 @@ function run(){
 
   renderStab(picks,list,STB);
 
-  LAST={list,tSort,key:picks.join('')+'|'+WMODE+(ZON?'z':'')};
+  LAST={list,tSort,stb:STB,key:picks.join('')+'|'+WMODE+(ZON?'z':'')};
   variant=0;
   invent();
 }
@@ -2652,11 +2652,19 @@ const FUNJ={
 let FUNVAR=0;
 
 // 순위는 「직업 이름 조합기」와 같은 자료를 본다 — 관심도만 곱해 순서를 바꾼다.
+// 범주는 **순위표와 같은 기준**으로 고른다 — 128설정 집계(1등 횟수 → 3위 안 든 횟수).
+// 예전에는 지금 설정 하나의 합의점수를 봐서, 순위표 1위와 여기 첫 칸의 범주가 서로 달랐다.
+// 관심도(×2.2 / ×1 / ×0.1)는 그대로 곱한다 — 순서만 바꾸는 자리라 성격이 같다.
 function funCats(){
   if(!LAST||!LAST.list.length) return [];
-  return LAST.list
-    .map(([c,v])=>({c,adj:v.agree*MULT[String(PREF[c]??0)],raw:v.agree}))
-    .sort((a,b)=>b.adj-a.adj||b.raw-a.raw)
+  const stb=LAST.stb, n=stb?stb.n:0;
+  const score=c=>stb?((stb.t1[c]||0)*(n+1)+(stb.t3[c]||0)):0;
+  const agreeOf=new Map(LAST.list.map(([c,v])=>[c,v.agree]));
+  const cats=new Set([...agreeOf.keys(),
+                      ...(stb?Object.keys(stb.t1):[]), ...(stb?Object.keys(stb.t3):[])]);
+  return [...cats]
+    .map(c=>({c:c, adj:score(c)*MULT[String(PREF[c]??0)], raw:score(c), tie:agreeOf.get(c)||0}))
+    .sort((a,b)=>b.adj-a.adj||b.raw-a.raw||b.tie-a.tie)
     .slice(0,3).map(r=>r.c);
 }
 // 관형절이 두 번 겹치면(「하루 3시간만 일하는 자수 놓는 청년」) 말이 걸린다.
