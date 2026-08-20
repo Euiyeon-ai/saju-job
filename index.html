@@ -610,7 +610,8 @@ body{line-height:1.7}
       <span class="hint">양력 기준</span></div>
     <div class="brow">
       <label class="bf"><span>생년월일</span>
-        <input type="date" id="bdate" min="1900-01-01" max="2100-12-31"></label>
+        <input type="text" id="bdate" inputmode="numeric" autocomplete="bday"
+          placeholder="1990-03-05" maxlength="10" size="11"></label>
       <label class="bf"><span>태어난 시각</span>
         <input type="time" id="btime" step="60"></label>
       <label class="bchk"><input type="checkbox" id="bnotime"> 시간을 모른다</label>
@@ -1984,8 +1985,11 @@ function birthCalc(){
   const fail=t=>{ msg.textContent=t; return false; };
   tEl.disabled=noTime;
   msg.textContent='';
-  if(!dEl.value) return fail('생년월일을 넣어주세요.');
-  const [y,m,d]=dEl.value.split('-').map(Number);
+  if(!dEl.value.trim()) return fail('생년월일을 넣어주세요. (예: 1990-03-05)');
+  const bd=parseBirthDate(dEl.value);
+  if(!bd) return fail('생년월일을 1990-03-05 꼴로 넣어주세요.');
+  if(bd.bad) return fail(`${bd.y}년 ${bd.m}월에는 ${bd.d}일이 없어요.`);
+  const y=bd.y, m=bd.m, d=bd.d;
   let hh=0, mm=0;
   if(!noTime){
     if(!tEl.value) return fail('태어난 시각을 넣거나 「시간을 모른다」에 표시해주세요.');
@@ -2124,6 +2128,32 @@ function showScreen(n){
   if(n===1) setHero([]);                       // 머리말을 기본 문구로 되돌린다
   window.scrollTo(0,0);
 }
+// 날짜는 직접 친다. 숫자만 보고 나머지 구분자는 뭐가 들어와도 받는다
+// (1990-03-05 · 1990.3.5 · 1990/03/05 · 19900305).
+// 달마다 마지막 날이 다르니 2월 30일 같은 건 여기서 걸러 말해준다.
+function parseBirthDate(v){
+  const t=String(v).replace(/[^0-9]/g,'');
+  let y,m,d;
+  if(t.length===8){ y=+t.slice(0,4); m=+t.slice(4,6); d=+t.slice(6,8); }
+  else{
+    const p=String(v).trim().split(/[^0-9]+/).filter(Boolean);
+    if(p.length!==3) return null;
+    y=+p[0]; m=+p[1]; d=+p[2];
+  }
+  if(!(y>=1000&&m>=1&&m<=12&&d>=1)) return null;
+  const last=[31,(isLeap(y)?29:28),31,30,31,30,31,31,30,31,30,31][m-1];
+  if(d>last) return {y:y,m:m,d:d,bad:true};
+  return {y:y,m:m,d:d};
+}
+// 하이픈은 **다 치고 난 뒤에** 정리한다. 한 글자씩 넣을 때마다 고치면
+// 「1990.3.5」를 치는 동안 점이 지워지면서 「1990-35」가 돼버린다(실제로 그랬다).
+// 커서 위치를 되돌릴 필요도 없어진다.
+function tidyBirthDate(){
+  const el=document.getElementById('bdate');
+  const b=parseBirthDate(el.value);
+  if(b&&!b.bad) el.value=`${b.y}-${String(b.m).padStart(2,'0')}-${String(b.d).padStart(2,'0')}`;
+}
+document.getElementById('bdate').addEventListener('blur',tidyBirthDate);
 ['bdate','btime'].forEach(id=>{
   const el=document.getElementById(id);
   const clear=()=>{document.getElementById('bmsg').textContent='';};
@@ -2134,6 +2164,7 @@ document.getElementById('bnotime').addEventListener('change',()=>{
   document.getElementById('bmsg').textContent='';
 });
 document.getElementById('bgo').addEventListener('click',()=>{
+  tidyBirthDate();
   if(birthCalc()) showScreen(2);
 });
 document.getElementById('bback').addEventListener('click',()=>showScreen(1));
