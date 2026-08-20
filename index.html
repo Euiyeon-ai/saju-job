@@ -111,6 +111,7 @@ select:focus-visible{outline:2px solid var(--su);outline-offset:1px}
 .oh .ohc{font-family:var(--font-m);font-size:var(--f-xs);color:var(--tx2);font-variant-numeric:tabular-nums}
 .prof{font-size:var(--f-sm);color:var(--tx2);margin:0 0 12px;max-width:76ch}
 .prof b{color:var(--tx)}
+.track .fN{background:var(--edge2)}   /* 지금 설정에선 0점이지만 다른 설정에선 상위인 범주 */
 .rep{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 10px}
 .rep span{font-family:var(--font-d);font-size:var(--f-sm);background:var(--surface);
   border:1px solid var(--edge2);border-radius:99px;padding:3px 12px;color:var(--tx2);line-height:1.3}
@@ -753,9 +754,15 @@ body{line-height:1.7}
         방송·언론이라, 예전 방식에서는 혼자 6점을 먹고 나머지 세 기둥을 눌렀다.
         <b>기본값에서 성향 어휘는 가리키는 범주마다 1항목씩 생겨 원문 용어의 2배 무게를 갖는다</b> —
         이건 의도한 게 아니라 자료 구조에서 떨어진 것이고, 아래 「어휘 무게」 옵션으로 끌 수 있다</li>
-      <li>순위는 <b>합의점수 = (기저 보정한 점수) × 기여 기둥 수</b>로 매긴다.
+      <li><b>화면의 순위는 128설정 집계로 매긴다</b> — 「1등을 몇 번 했나 → 3위 안에 몇 번 들었나」.
+        「나의 직업은?」과 같은 원리이고, 그래서 맨 윗줄이 그 답과 항상 같다.
+        막대 길이도 이 값이다. 설정 토글을 만져도 순서가 안 바뀌는 이유가 이것이다 —
+        <b>예전에는 지금 설정 하나의 점수로 줄을 세워서</b> 토글마다 순위가 뒤집혔다
+        (무작위 사주의 94.8%에서 1위가 바뀐다). <b>지금 설정에서 0점인 범주도 줄에 세운다</b> —
+        십신을 켜야 점수가 붙는 범주가 다른 설정에서는 1등을 하기 때문이다. 그 줄의 막대는 회색이다</li>
+      <li>설정 <b>하나 안에서의</b> 순위는 <b>합의점수 = (기저 보정한 점수) × 기여 기둥 수</b>로 매긴다.
         점수만 쓰면 목록 긴 기둥이 독식하고, 기둥 수만 쓰면 약한 신호 3개가 강한 신호 2개를 이긴다.
-        곱해서 <b>넓이와 세기를 둘 다</b> 본다</li>
+        곱해서 <b>넓이와 세기를 둘 다</b> 본다. 이 점수는 각 행 오른쪽에 여전히 적힌다</li>
       <li><b>기저 보정</b> — 점수를 그 범주가 60칸 전체에서 평균적으로 받는 몫으로 나눈다.
         각 행 오른쪽에 <span class="src">3.1배×2</span> 처럼 <b>평균 대비 몇 배</b>인지가 표시된다.
         끄면 <span class="src">0.68×2</span> 꼴의 원점수로 돌아간다</li>
@@ -2240,6 +2247,7 @@ function run(){
   // --- 직업 추천 ---
   const W=WSET[WMODE];
   const {list,sshit,dayStem}=scoreCats(picks,W,ZON,NORM);
+  const STB=stability(picks);        // 128설정 집계 — 순위와 「나의 직업은?」이 같은 걸 본다
   SSHIT=sshit;
 
   const ssbox=document.getElementById('ssbox');
@@ -2258,9 +2266,29 @@ function run(){
         : '<p class="ssn">월지·일지가 아직 안 골라졌다.</p>');
   }
   if(!list.length){ivp.hidden=true; out.innerHTML='<p class="empty">낼 결과가 없음.</p>'; return}
-  const max=list[0][1].agree;
+  // 순위를 「나의 직업은?」과 **같은 원리**로 매긴다.
+  // 지금 설정 하나의 점수로 줄을 세우면, 토글을 건드릴 때마다 순서가 뒤집힌다
+  // (무작위 사주 3000개 중 94.8%에서 1위가 바뀐다). 그래서 128설정을 전부 돌려
+  // **1등을 몇 번 했나 → 3위 안에 몇 번 들었나** 순으로 줄을 세운다.
+  // 이러면 맨 윗줄이 「나의 직업은?」의 답과 항상 같아진다.
+  const winOf=c=>STB.t1[c]||0, t3Of=c=>STB.t3[c]||0;
+  // 1등 횟수를 먼저 보고 동점이면 3위 안 든 횟수 — 그 둘을 한 수로 합친다.
+  // (3위 횟수는 최대 n이니 1등에 n+1을 곱하면 사전식 비교가 그대로 유지된다)
+  // 막대 길이도 **이 값**으로 그린다. 순위는 이걸로 매기면서 막대는 딴 걸 그리면
+  // 1위 줄의 막대가 2위보다 짧아 보인다 — 실제로 그랬다.
+  const rankScore=c=>winOf(c)*(STB.n+1)+t3Of(c);
+  // **지금 설정에서 0점인 범주도 줄에 세운다.** 십신을 켜야 점수가 붙는 범주처럼,
+  // 다른 설정에서 1등을 하는데 지금 목록에는 아예 없는 것들이 있다.
+  // 그것들을 빼면 맨 윗줄이 「나의 직업은?」의 답과 어긋난다 — 실제로 어긋났다.
+  const byCat=new Map(list);
+  const zero=()=>({a:0,b:0,c:0,A:[],B:[],C:[],pil:new Set(),tot:0,np:0,base:1,k:1,lift:0,agree:0});
+  const ranked=[...new Set([...byCat.keys(),...Object.keys(STB.t1),...Object.keys(STB.t3)])]
+    .map(c=>[c, byCat.get(c)||zero()])
+    .sort((x,y)=> rankScore(y[0])-rankScore(x[0]) || y[1].agree-x[1].agree);
+  const maxScore=Math.max(...ranked.map(r=>rankScore(r[0])),1);
+  const share=c=>rankScore(c)/maxScore;
 
-  out.innerHTML='<div class="rows">'+list.map(([c,v],idx)=>{
+  out.innerHTML='<div class="rows">'+ranked.map(([c,v],idx)=>{
     const why = v.B.length
       ? v.B.slice(0,3).map(e=>`「${e.m.split(' · ')[0]}」의 ${e.t}`).join(' · ')
       : v.A.length
@@ -2275,16 +2303,17 @@ function run(){
     const pv=PREF[c]??0;
     return `<details class="row ${pv===-1?'muted':''}"${idx===0?' open':''}>
       <summary>
-        <span class="rname"><span class="t"><span class="caret">▶</span>${nice(c)}<span class="rcat">${c}</span><span class="npc" title="이 직업을 가리킨 기둥 수">기둥 ${v.np}</span>${
+        <span class="rname"><span class="t"><span class="caret">▶</span>${nice(c)}<span class="rcat">${c}</span>${v.np?`<span class="npc" title="이 직업을 가리킨 기둥 수">기둥 ${v.np}</span>`:''}${
           (CATSRC_N[c]||0)<=2?`<span class="npc hi" title="원문 60칸 중 이 범주를 직업으로 지목한 칸 수 — 희소 신호">원문 ${CATSRC_N[c]||0}칸</span>`:''
         }</span><span class="why">${why}</span></span>
-        <span class="track">
-          <span class="fA" style="width:${v.a*v.k*v.np/max*100}%"></span>
-          <span class="fB" style="width:${v.b*v.k*v.np/max*100}%"></span>
-          <span class="fC" style="width:${v.c*v.k*v.np/max*100}%"></span>
-        </span>
-        <span class="rsc" title="${NORM?`원점수 ${v.tot.toFixed(2)} ÷ 기저 ${v.base.toFixed(3)} × 기둥 ${v.np}`:`원점수 ${v.tot.toFixed(2)} × 기둥 ${v.np}`}"><b>${v.agree.toFixed(2)}</b>${
-          NORM?`${v.lift.toFixed(1)}배×${v.np}`:`${v.tot.toFixed(2)}×${v.np}`}</span>
+        <span class="track" title="128설정 중 3위 안에 ${t3Of(c)}번 · 1등 ${winOf(c)}번">${
+          (v.a+v.b+v.c)>0
+          ? `<span class="fA" style="width:${share(c)*(v.a/(v.a+v.b+v.c))*100}%"></span>
+             <span class="fB" style="width:${share(c)*(v.b/(v.a+v.b+v.c))*100}%"></span>
+             <span class="fC" style="width:${share(c)*(v.c/(v.a+v.b+v.c))*100}%"></span>`
+          : `<span class="fN" style="width:${share(c)*100}%"></span>`   /* 지금 설정에선 0점 */
+        }</span>
+        <span class="rsc" title="지금 설정 점수 ${v.agree.toFixed(2)} (원점수 ${v.tot.toFixed(2)} × 기둥 ${v.np})"><b>${winOf(c)}번</b>3위 안 ${t3Of(c)}번</span>
         <span class="pref" data-c="${c}">
           <button type="button" data-v="1"  aria-pressed="${pv===1}">관심</button>
           <button type="button" data-v="0"  aria-pressed="${pv===0}">보통</button>
@@ -2294,7 +2323,7 @@ function run(){
       <div class="detail">${rowsHtml}</div></details>`;
   }).join('')+'</div>';
 
-  renderStab(picks,list);
+  renderStab(picks,list,STB);
 
   LAST={list,tSort,key:picks.join('')+'|'+WMODE+(ZON?'z':'')};
   variant=0;
@@ -2856,11 +2885,11 @@ document.getElementById('srcout').addEventListener('click',async e=>{
 // --- 안정성 리포트 ---
 // 순위표보다 **위에** 둔다. 1등을 먼저 보여주고 나중에 "사실 흔들린다"고 하면
 // 이미 1등이 머리에 박힌 뒤다.
-function renderStab(picks, list){
+function renderStab(picks, list, stb){
   const panel=document.getElementById('stabpanel'), box=document.getElementById('stabout');
   const cur={w:WMODE, z:ZON?1:0, nm:NORM?1:0,
              aw:OPT.aw?1:0, bx:OPT.bx?1:0, cm:OPT.cm?1:0, dp:OPT.dp?1:0};
-  const {t1,t3,n,seq}=stability(picks);
+  const {t1,t3,n,seq}=stb||stability(picks);
   if(!n){ panel.hidden=true; return; }
   panel.hidden=false;
 
