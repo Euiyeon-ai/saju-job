@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>사주 직업 뽑기 🔮</title>
 <script>
   // 기본은 「가볍게 뽑아보는 앱」. 근거·민감도·계산 설명은 .lab 클래스로 묶어 감춘다.
@@ -41,7 +42,8 @@
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--font-b);
-  font-size:var(--f-base);line-height:1.6;-webkit-font-smoothing:antialiased}
+  font-size:var(--f-base);line-height:1.6;-webkit-font-smoothing:antialiased;
+  word-break:keep-all;overflow-wrap:anywhere}
 .wrap{max-width:1080px;margin:0 auto;padding:0 20px}
 code{font-family:var(--font-m);font-size:.9em}
 
@@ -523,6 +525,18 @@ body{line-height:1.7}
 .lite .row summary{cursor:default}
 .lite footer.litely{margin-top:36px;border-top:1px dashed var(--edge);
   padding:18px 0 48px;text-align:center;color:var(--tx3);font-size:var(--f-sm)}
+
+/* ── 모바일 마무리 ──
+   가벼운 모드에서는 점수 칸(.rsc)이 없으니 그 자리를 비워두지 않는다.
+   관심도 버튼 셋이 한 줄을 통째로 먹어서, 좁은 화면에서는 조금 줄인다. */
+@media(max-width:700px){
+  .lite .row summary{grid-template-columns:1fr;gap:6px 8px;padding:8px 8px}
+  .lite .pref button{padding:2px 9px}
+  .lite .rname .t{gap:5px}
+  .wrap{padding:0 14px}
+  .bpil{gap:6px}
+  .bout .bp{min-width:64px;padding:5px 10px 6px;font-size:1.05rem}
+}
 </style>
 
 <header class="top">
