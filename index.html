@@ -476,6 +476,25 @@ body{line-height:1.7}
 .bcap b{color:var(--tx2)}
 #bopts{margin-top:14px}
 
+/* ── 두 화면 ── */
+.gorow{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:20px}
+.go{font-family:var(--font-d);font-size:1.1rem;cursor:pointer;border:none;border-radius:99px;
+  background:var(--to);color:var(--ink);padding:12px 34px;letter-spacing:.02em}
+.go:hover{filter:brightness(1.06)}
+.go:focus-visible{outline:2px solid var(--su);outline-offset:3px}
+.bmsg{margin:0;font-family:var(--font-b);font-size:var(--f-sm);color:var(--hwa)}
+.topbar{display:flex;justify-content:flex-start;margin-bottom:14px}
+.back{font-family:var(--font-b);font-size:var(--f-sm);cursor:pointer;background:transparent;
+  color:var(--tx2);border:1px solid var(--edge2);border-radius:99px;padding:6px 16px}
+.back:hover{color:var(--tx);border-color:var(--tx3)}
+.manual{margin-top:26px;border:1px dashed var(--edge);border-radius:14px;padding:4px 16px}
+.manual>summary{cursor:pointer;font-family:var(--font-b);font-size:var(--f-sm);
+  color:var(--tx3);padding:12px 2px;list-style:none}
+.manual>summary::-webkit-details-marker{display:none}
+.manual>summary::before{content:"▸ ";color:var(--tx3)}
+.manual[open]>summary::before{content:"▾ "}
+.manual .panel{border:none;padding:0;margin:0 0 10px;background:transparent}
+
 /* ── 가벼운 모드 ──
    .lab = 근거·민감도·계산 설명. 지우지 않고 감춘다. ?lab=1 이면 .lite가 안 붙어 전부 보인다.
    .litely = 가벼운 모드에서만 보이는 것. */
@@ -486,7 +505,12 @@ body{line-height:1.7}
 .lite .rname .caret,
 .lite .detail,
 .lite .srare,
-.lite .refute{display:none}
+.lite .refute,
+.lite .npc,
+.lite .rsc,
+.lite .jchip u,
+.lite .band .bl2 span i{display:none}
+.lite .row summary{grid-template-columns:minmax(140px,196px) 1fr auto}
 .lite .row summary{cursor:default}
 .lite footer.litely{margin-top:36px;border-top:1px dashed var(--edge);
   padding:18px 0 48px;text-align:center;color:var(--tx3);font-size:var(--f-sm)}
@@ -529,9 +553,8 @@ body{line-height:1.7}
       </div>
       <div class="herotext">
         <h1 id="hero">당신의 직업은~? <span class="drum">두구두구두구</span></h1>
-        <p class="herocap" id="herocap" hidden></p>
-        <p class="lede litely">네 기둥을 고르면 어울리는 직업을 뽑아준다.
-          가볍게, 재미로 🍀</p>
+        <p class="herocap lab" id="herocap" hidden></p>
+        <p class="lede litely">생년월일을 넣으면 어울리는 직업을 뽑아준다. 가볍게, 재미로 🍀</p>
         <p class="lede lab">년·월·일·시 네 기둥을 고르면 직업을 추천한다.
           그리고 <b>그 추천이 어디서 왔는지, 설정을 바꾸면 얼마나 버티는지</b>를 같이 보여준다.
           맞히는 것보다 <b>어디서 만들어졌는지</b>를 보는 도구다.</p>
@@ -558,23 +581,26 @@ body{line-height:1.7}
 </header>
 
 <main class="wrap">
+<section id="screen1">
   <div class="panel" id="bpanel">
     <div class="panelhead"><h2>생년월일시</h2>
-      <span class="hint">양력 기준 · 넣으면 네 기둥이 자동으로 채워진다</span></div>
+      <span class="hint">양력 기준</span></div>
     <div class="brow">
       <label class="bf"><span>생년월일</span>
         <input type="date" id="bdate" min="1900-01-01" max="2100-12-31"></label>
       <label class="bf"><span>태어난 시각</span>
         <input type="time" id="btime" step="60"></label>
       <label class="bchk"><input type="checkbox" id="bnotime"> 시간을 모른다</label>
-      <span class="bf"><span>성별 <i class="bwhy">대운 방향에만 쓴다</i></span>
+      <span class="bf"><span>성별</span>
         <span class="mg bsex" id="bsex">
           <button type="button" data-x="f" aria-pressed="false">여자</button>
           <button type="button" data-x="m" aria-pressed="false">남자</button>
         </span></span>
     </div>
-    <p class="bout" id="bout">생년월일을 넣으면 네 기둥을 계산해서 아래를 채운다.</p>
-    <div class="dunbox" id="bdun" hidden></div>
+    <div class="gorow">
+      <button type="button" id="bgo" class="go">결과 보기</button>
+      <p class="bmsg" id="bmsg"></p>
+    </div>
     <div class="modes lab" id="bopts">
       <span class="mg"><span class="mlbl">경도 보정</span>
         <button type="button" id="blon" aria-pressed="false">끔 — 동경 135도 시계 그대로</button></span>
@@ -584,42 +610,38 @@ body{line-height:1.7}
     <p class="bcap lab" id="bcap"></p>
   </div>
 
-  <div class="panel">
-    <div class="panelhead"><h2>기둥 선택</h2><span class="hint">위에 생년월일을 넣으면 자동으로 채워진다 · 직접 골라도 된다</span></div>
-    <div class="pillars" id="pillars"></div>
-    <div class="daeunwrap">
-      <p class="dcap"><b>대운</b> — 10년마다 바뀌는 운의 기둥. 위에 생년월일과 성별을 넣으면
-        지금 지나는 대운이 자동으로 들어온다. 직접 골라도 되고, 비워둬도 된다.
-        타고난 네 기둥의 <b>0.7 무게</b>로 센다 — 지금 지나는 운이라 빼지는 않지만,
-        타고난 것과 동등하게 두지도 않는다.</p>
-      <div class="pillars" id="daeun"></div>
-    </div>
-    <div class="cov lab" id="cov"></div>
+
+</section>
+
+<section id="screen2" hidden>
+  <div class="topbar">
+    <button type="button" id="bback" class="back">← 다시 입력</button>
   </div>
+  <p class="bout" id="bout"></p>
 
   <div class="panel" id="profpanel" hidden>
-    <div class="panelhead"><h2>성향 프로필</h2><span class="hint">오행은 천간·지지 8글자 기준</span></div>
+    <div class="panelhead"><h2>성향 프로필</h2><span class="hint lab">오행은 천간·지지 8글자 기준</span></div>
     <div class="ohaeng" id="ohaeng"></div>
-    <p class="prof" id="profline"></p>
+    <p class="prof lab" id="profline"></p>
     <div class="rep" id="rep"></div>
   </div>
 
   <div class="panel" id="srcpanel" hidden>
-    <div class="panelhead"><h2>원문이 직접 적어놓은 직업</h2>
-      <span class="hint" id="srchint"></span></div>
+    <div class="panelhead"><h2>사주에 적힌 직업</h2>
+      <span class="hint lab" id="srchint"></span></div>
     <div id="srcout"></div>
   </div>
 
   <div class="panel" id="stabpanel" hidden>
-    <div class="panelhead"><h2>가장 자주 나온 결과</h2>
-      <span class="hint">채점 방식을 128가지로 바꿔가며 돌린 뒤, 제일 많이 1등한 것</span></div>
+    <div class="panelhead"><h2>추천 결과</h2>
+      <span class="hint lab">채점 방식을 128가지로 바꿔가며 돌린 뒤, 제일 많이 1등한 것</span></div>
     <div id="stabout"></div>
   </div>
 
   <div class="panel" id="ivpanel" hidden>
     <div class="panelhead"><h2>직업 이름 조합기</h2>
-      <span class="hint">순위가 정해진 뒤 이름만 짓는 단계 · 원문에 없는 말</span>
-      <span class="hint" id="ivnote"></span>
+      <span class="hint lab">순위가 정해진 뒤 이름만 짓는 단계 · 원문에 없는 말</span>
+      <span class="hint lab" id="ivnote"></span>
       <span class="mg medg" id="medium"><span class="mlbl">작업 매체</span>
         <button type="button" data-md="auto" aria-pressed="true">자동</button>
         <button type="button" data-md="phys" aria-pressed="false">물리 · 손</button>
@@ -628,7 +650,7 @@ body{line-height:1.7}
       <button class="reroll" id="tx" type="button" aria-pressed="true">신흥 직업 섞기 · 켬</button>
       <button class="reroll" id="reroll" type="button">다른 조합 보기</button></div>
     <div class="invent" id="invent"></div>
-    <p class="prof" style="margin:14px 0 0"><b>이 이름들은 조합 규칙이 만든 것이고 원문 자료에 존재하지 않는다.</b>
+    <p class="prof lab" style="margin:14px 0 0"><b>이 이름들은 조합 규칙이 만든 것이고 원문 자료에 존재하지 않는다.</b>
       상위 범주의 <b>분야</b>에 다른 범주의 <b>직능</b>을 붙인다 — 두 분야가 겹치는 자리라 낯설게 들린다.
       같은 사주 + 같은 관심도면 항상 같은 결과가 나온다. 무작위가 아니다.</p>
   </div>
@@ -673,7 +695,7 @@ body{line-height:1.7}
     <p class="wnote lab" id="wnote"></p>
     <div class="ssbox lab" id="ssbox" hidden></div>
 
-    <div class="key">
+    <div class="key lab">
       <div><span class="sw" style="background:var(--bar)"></span>원문에 직업으로 적힌 것</div>
       <div><span class="sw" style="background:var(--bar2)"></span>물상 성향에서 파생 — 내 추론</div>
       <div><span class="sw" style="background:var(--su);opacity:.6"></span>십신 — <b>월지·일지에만 적용</b></div>
@@ -693,6 +715,23 @@ body{line-height:1.7}
     <p class="advline" id="advline"></p>
     <p class="advcap lab" id="advcap"></p>
   </div>
+
+  <details class="manual">
+    <summary>기둥 · 대운 직접 고르기</summary>
+    <div class="dunbox" id="bdun" hidden></div>
+  <div class="panel">
+    <div class="panelhead"><h2>기둥 선택</h2><span class="hint lab">위에 생년월일을 넣으면 자동으로 채워진다 · 직접 골라도 된다</span></div>
+    <div class="pillars" id="pillars"></div>
+    <div class="daeunwrap">
+      <p class="dcap lab"><b>대운</b> — 10년마다 바뀌는 운의 기둥. 위에 생년월일과 성별을 넣으면
+        지금 지나는 대운이 자동으로 들어온다. 직접 골라도 되고, 비워둬도 된다.
+        타고난 네 기둥의 <b>0.7 무게</b>로 센다 — 지금 지나는 운이라 빼지는 않지만,
+        타고난 것과 동등하게 두지도 않는다.</p>
+      <div class="pillars" id="daeun"></div>
+    </div>
+    <div class="cov lab" id="cov"></div>
+  </div>
+  </details>
 
   <section class="notes lab">
     <h3>어떻게 계산하나</h3>
@@ -1051,6 +1090,7 @@ body{line-height:1.7}
       매핑을 바꾸면 결과가 바뀐다는 사실 자체가, 이 방식이 검정이 될 수 없는 이유다.
       검정은 <code>07-가설-추출.md</code>의 집합 검정으로 따로 한다.</p>
   </section>
+</section>
 </main>
 
 <footer class="lab">
@@ -1910,22 +1950,20 @@ function birthCalc(){
   const dEl=document.getElementById('bdate'), tEl=document.getElementById('btime'),
         nEl=document.getElementById('bnotime'),
         out=document.getElementById('bout'), cap=document.getElementById('bcap');
+  const msg=document.getElementById('bmsg');
   const noTime=nEl.checked;
+  const fail=t=>{ msg.textContent=t; return false; };
   tEl.disabled=noTime;
-  if(!dEl.value){
-    out.innerHTML='생년월일을 넣으면 네 기둥을 계산해서 아래를 채운다.'; cap.innerHTML=''; return;
-  }
+  msg.textContent='';
+  if(!dEl.value) return fail('생년월일을 넣어주세요.');
   const [y,m,d]=dEl.value.split('-').map(Number);
   let hh=0, mm=0;
   if(!noTime){
-    if(!tEl.value){
-      out.innerHTML='태어난 시각도 넣거나, <b>「시간을 모른다」</b>에 표시해라 — 시주를 빼고 세 기둥으로 계산한다.';
-      cap.innerHTML=''; return;
-    }
+    if(!tEl.value) return fail('태어난 시각을 넣거나 「시간을 모른다」에 표시해주세요.');
     const tp=tEl.value.split(':'); hh=+tp[0]; mm=+tp[1];
   }
   const r=sajuPillars({y:y,m:m,d:d,hh:hh,mm:mm,noTime:noTime,lonAdj:BLON,yaja:BYAJA});
-  if(!r){ out.textContent='1900~2100년 사이만 계산한다. 절기표가 그 범위다.'; cap.innerHTML=''; return; }
+  if(!r) return fail('1900~2100년 사이만 계산할 수 있어요.');
 
   ['s0','s1','s2','s3'].forEach((id,i)=>{
     document.getElementById(id).value=[r.year,r.month,r.day,noTime?'':(r.hour||'')][i];
@@ -1951,9 +1989,9 @@ function birthCalc(){
   if(noTime) warn.push('시간을 몰라서 <b>시주는 비워뒀다.</b> 남은 세 기둥으로 계산한다.');
   if(r.gap) warn.push('서머타임이 시작되며 <b>건너뛴 시각</b>이다 — 실제로는 없던 시계 눈금이라 직전 표준시로 읽었다.');
 
-  out.innerHTML=`${pil}<span class="bsum">${y}년 ${m}월 ${d}일 ${noTime?'(시간 모름)':pad(hh)+':'+pad(mm)} ·
+  out.innerHTML=`${pil}<span class="bsum lab">${y}년 ${m}월 ${d}일 ${noTime?'(시간 모름)':pad(hh)+':'+pad(mm)} ·
     <b>${r.sajuYear}년 ${r.termName}</b>${jong(r.termName.slice(-1))>0?'이':'가'} 연 달이다.</span>`+
-    (warn.length?`<span class="bwarn">${warn.join('</span><span class="bwarn">')}</span>`:'');
+    (warn.length?`<span class="bwarn lab">${warn.join('</span><span class="bwarn lab">')}</span>`:'');
 
   cap.innerHTML=`<b>어떻게 갈랐나.</b>
     년주는 <b>1월 1일이 아니라 입춘</b>에서 바뀐다 — 2월 3~5일 절입 전에 태어났으면 앞 해다.
@@ -1974,6 +2012,7 @@ function birthCalc(){
     <b>이 규칙들도 명리 통설이지 검증된 게 아니다</b> — 대운수를 반올림할지 버릴지도 책마다 다르다.
     <br><b>경도 보정과 야자시는 유파가 갈리는 자리라 토글로 뺐다.</b> 켜고 끄면 기둥이 실제로 바뀐다 —
     바뀐다면 그 기둥은 자료가 아니라 이 선택이 만든 것이다.`;
+  return true;
 }
 // ── 대운 (UI) ──
 // 지금 어느 대운을 지나는지는 **오늘 날짜**로 정해진다. 사다리를 통째로 보여주고
@@ -1985,13 +2024,13 @@ function renderDaeun(r,noTime){
   if(!r){ box.hidden=true; return; }
   if(r.prevAbs===null||r.nextAbs===null){        // 절기표 양 끝 — 앞뒤 절입이 표 밖이다
     box.hidden=false; sel.value='';
-    box.innerHTML='<p class="dunnote">절기표 끝이라 앞뒤 절입 거리를 못 재고, 그래서 대운도 못 낸다.</p>';
+    box.innerHTML='<p class="dunnote lab">절기표 끝이라 앞뒤 절입 거리를 못 재고, 그래서 대운도 못 낸다.</p>';
     return;
   }
   const d=daeunList(r,BSEX);
   if(!d){
     box.hidden=false;
-    box.innerHTML='<p class="dunnote">대운은 <b>순행·역행이 성별로 갈려서</b> 성별을 골라야 나온다. '+
+    box.innerHTML='<p class="dunnote lab">대운은 <b>순행·역행이 성별로 갈려서</b> 성별을 골라야 나온다. '+
       '(양남음녀 순행 · 음남양녀 역행) 안 고르면 대운 없이 원국 네 기둥으로만 계산한다.</p>';
     sel.value='';
     return;
@@ -2005,13 +2044,13 @@ function renderDaeun(r,noTime){
   const f=n=>Math.floor(n);
   box.hidden=false;
   box.innerHTML=
-    `<div class="dunh">대운 · <b>${d.forward?'순행':'역행'}</b> · 첫 대운 <b>${d.num.toFixed(1)}세</b>
+    `<div class="dunh lab">대운 · <b>${d.forward?'순행':'역행'}</b> · 첫 대운 <b>${d.num.toFixed(1)}세</b>
        (${d.boundary} 절입까지 ${d.distDays.toFixed(1)}일 → 3일을 1년으로 셈)</div>
      <div class="dunrow" id="dunrow">`+
     d.list.map(x=>`<button type="button" data-gz="${x.gz}" data-n="${x.n}"
         aria-pressed="${cur&&cur.n===x.n?'true':'false'}">${f(x.from)}~${f(x.to)-1}세<b>${x.gz}</b></button>`).join('')+
     `</div>
-     <p class="dunnote">${cur
+     <p class="dunnote lab">${cur
         ? `지금 <b>만 ${age.toFixed(1)}세</b> — <b>${cur.gz}</b> 대운을 지나는 중이라 그걸 넣었다. 다른 칸을 눌러 그 시기로 바꿔볼 수 있다.`
         : (age<d.num
            ? `아직 첫 대운(<b>${d.num.toFixed(1)}세</b>) 전이라 대운을 비웠다. 칸을 누르면 그 시기로 넣어볼 수 있다.`
@@ -2044,22 +2083,40 @@ document.getElementById('bsex').addEventListener('click',e=>{
   BSEX = BSEX===b.dataset.x ? null : b.dataset.x;
   document.querySelectorAll('#bsex button').forEach(x=>
     x.setAttribute('aria-pressed', String(x.dataset.x===BSEX)));
-  birthCalc();
+  document.getElementById('bmsg').textContent='';
+  if(document.body.classList.contains('step2')) birthCalc();
 });
+// 화면 전환 — 1: 입력 / 2: 별명·결과.
+// 입력하는 동안에는 계산하지 않는다. 미리 돌리면 머리말의 별명이 먼저 새서 「결과 보기」가 무의미해진다.
+function showScreen(n){
+  document.getElementById('screen1').hidden = n!==1;
+  document.getElementById('screen2').hidden = n!==2;
+  document.body.classList.toggle('step2', n===2);
+  if(n===1) setHero([]);                       // 머리말을 기본 문구로 되돌린다
+  window.scrollTo(0,0);
+}
 ['bdate','btime'].forEach(id=>{
   const el=document.getElementById(id);
-  el.addEventListener('change',birthCalc); el.addEventListener('input',birthCalc);
+  const clear=()=>{document.getElementById('bmsg').textContent='';};
+  el.addEventListener('change',clear); el.addEventListener('input',clear);
 });
-document.getElementById('bnotime').addEventListener('change',birthCalc);
+document.getElementById('bnotime').addEventListener('change',()=>{
+  document.getElementById('btime').disabled=document.getElementById('bnotime').checked;
+  document.getElementById('bmsg').textContent='';
+});
+document.getElementById('bgo').addEventListener('click',()=>{
+  if(birthCalc()) showScreen(2);
+});
+document.getElementById('bback').addEventListener('click',()=>showScreen(1));
 document.getElementById('blon').addEventListener('click',e=>{
   BLON=!BLON; e.currentTarget.setAttribute('aria-pressed',String(BLON));
   e.currentTarget.textContent=BLON?'켬 — 서울 기준 32분을 뺀다':'끔 — 동경 135도 시계 그대로';
-  birthCalc();
+  if(document.body.classList.contains('step2')) birthCalc();
 });
 document.getElementById('byaja').addEventListener('click',e=>{
   BYAJA=!BYAJA; e.currentTarget.setAttribute('aria-pressed',String(BYAJA));
   e.currentTarget.textContent=BYAJA?'켬 — 23시 이후는 다음날 일주':'끔 — 23시 이후도 그날 일주';
-  birthCalc();
+  if(document.body.classList.contains('step2')) birthCalc();
 });
 
 
@@ -2119,7 +2176,7 @@ function run(){
       else body+=`<span class="none">${e.n}</span>`;
     }
     const wv=WSET[WMODE][i];
-    const wtag = wv!==1 ? `<span class="mm" style="color:var(--to)">배점 ×${wv}</span>` : '';
+    const wtag = wv!==1 ? `<span class="mm lab" style="color:var(--to)">배점 ×${wv}</span>` : '';
     box.innerHTML=`<span class="mnm">${p}<span class="el el${el}">${el}</span></span>${body}${wtag}`;
   });
 
@@ -2639,7 +2696,7 @@ function renderFun(){
   const names=cats.map((c,i)=>({c,n:funName(c,h+i*137,g0+i,used)}));
   line.className='advline';
   // 캡션(.advcap)은 가벼운 모드에서 감춰지니, 「지어낸 말」이라는 표시는 힌트에도 둔다.
-  hint.textContent=`1위 범주 「${nice(cats[0])}」에서 뽑은 지어낸 이름`;
+  hint.textContent='재미로 지어낸 이름';
   line.innerHTML=`<b class="funname">${names[0].n}</b>`+
     (names.length>1
       ? `<span class="funmore">이런 것도 있다${names.slice(1).map(x=>
@@ -2791,12 +2848,12 @@ function renderStab(picks, list){
 
   box.innerHTML=
     `<div class="resmain">
-       <span class="reslbl">가장 자주 나온 건</span>
+       <span class="reslbl">가장 어울리는 일</span>
        <b class="resnice ${cls}">${nice(win)}</b>
        <span class="rescat">${win}</span>
-       <p class="resnote">채점 방식을 <b>${n}가지</b>로 바꿔가며 돌렸더니 그중 <b>${cnt}번</b> 1등이었다. ${tone}</p>
+       <p class="resnote lab">채점 방식을 <b>${n}가지</b>로 바꿔가며 돌렸더니 그중 <b>${cnt}번</b> 1등이었다. ${tone}</p>
      </div>
-     ${also.length?`<div class="band keep"><div class="bh">그다음으로 자주 1등한 것</div>
+     ${also.length?`<div class="band keep"><div class="bh">그다음 후보</div>
        <div class="bl2">${also.map(([c,v])=>`<span>${nice(c)}<i>${v}번</i></span>`).join('')}</div></div>`:''}
      <details class="resdet lab"><summary>이 숫자가 어떻게 나왔나 — 그림으로 보기</summary>
        <div class="resdetin">
@@ -2936,8 +2993,8 @@ function invent(){
     `<div class="iv ${c.i===0?'i1':''}">
        <span class="rk">TOP ${c.i+1}</span>
        <p class="jn">${c.name}</p>
-       <p class="jd">${c.desc}</p>
-       <div class="jf">
+       <p class="jd lab">${c.desc}</p>
+       <div class="jf lab">
          <span>분야 · ${nice(c.cD)}</span>
          <span>직능 · ${nice(c.cJ)}</span>
          ${c.tr?`<span class="tr">성향 · ${c.tr}</span>`:''}
