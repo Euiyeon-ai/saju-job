@@ -470,6 +470,39 @@ body{line-height:1.7}
 .bout .bwarn{display:block;margin-top:6px;color:var(--hwa)}
 .bwhy{font-style:normal;color:var(--tx3);opacity:.75}
 .bsex button{font-family:var(--font-b)}
+
+/* ── 상황 칩 · 추천 행동 ── */
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{font-family:var(--font-b);font-size:var(--f-sm);cursor:pointer;
+  background:transparent;color:var(--tx2);border:1px solid var(--edge2);border-radius:99px;
+  padding:7px 15px}
+.chips button:hover{color:var(--tx)}
+.chips button:focus-visible{outline:2px solid var(--su);outline-offset:1px}
+.chips button[aria-pressed="true"]{background:var(--to);border-color:var(--to);color:var(--ink)}
+.chips.sm button{font-size:var(--f-xs);padding:4px 11px}
+.whorow{display:flex;flex-direction:column;gap:16px}
+.whorow .bf input{min-width:200px}
+.fldlbl{font-size:var(--f-xs);color:var(--tx3);font-family:var(--font-b);
+  display:block;margin-bottom:7px}
+.actpanel{border-left:3px solid var(--bar)}
+.actlist{display:flex;flex-direction:column;gap:10px}
+.act{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--edge);
+  border-radius:7px;padding:13px 15px;background:var(--surface)}
+.act .an{font-family:var(--font-m);font-size:var(--f-xs);color:var(--tx3);
+  padding-top:4px;flex:none}
+.act.no{border-style:dashed}
+.act.no .an{color:var(--hwa)}
+.act .ab{min-width:0;flex:1 1 auto}
+.act .at{font-family:var(--font-d);font-size:1.08rem;line-height:1.6;margin:0;color:var(--tx)}
+.act .at b{color:var(--to)}
+.act.no .at b{color:var(--hwa)}
+.act .af{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.act .af span{font-size:var(--f-xs);border:1px solid var(--edge2);border-radius:3px;
+  padding:2px 7px;color:var(--tx3)}
+.act .af span.s1{border-color:var(--to);color:var(--to)}
+.act .af span.s2{border-style:dashed}
+.actempty{font-family:var(--font-b);font-size:var(--f-sm);color:var(--tx3);margin:0}
+@media(max-width:640px){.act .at{font-size:1rem}}
 .dunbox{margin-top:16px}
 .dunh{font-size:var(--f-xs);font-family:var(--font-m);letter-spacing:.06em;color:var(--tx3);
   margin-bottom:7px}
@@ -621,10 +654,6 @@ body{line-height:1.7}
           <button type="button" data-x="m" aria-pressed="false">남자</button>
         </span></span>
     </div>
-    <div class="gorow">
-      <button type="button" id="bgo" class="go">결과 보기</button>
-      <p class="bmsg" id="bmsg"></p>
-    </div>
     <div class="modes lab" id="bopts">
       <span class="mg"><span class="mlbl">경도 보정</span>
         <button type="button" id="blon" aria-pressed="false">끔 — 동경 135도 시계 그대로</button></span>
@@ -634,6 +663,34 @@ body{line-height:1.7}
     <p class="bcap lab" id="bcap"></p>
   </div>
 
+  <div class="panel" id="whopanel">
+    <div class="panelhead"><h2>직업 분석 정보</h2>
+      <span class="hint" id="whohint">분석에 쓸 정보를 넣어주세요</span></div>
+    <div class="whorow">
+      <label class="bf"><span>어떻게 부를까요 <i style="font-style:normal;opacity:.7">(선택)</i></span>
+        <input type="text" id="bname" maxlength="12" autocomplete="off"
+          placeholder="비워두면 별명으로 부른다"></label>
+      <div>
+        <span class="fldlbl">현재 상황 <i style="font-style:normal;opacity:.7">(선택 — 마지막 칸의 행동 제안이 바뀐다)</i></span>
+        <div class="chips" id="bsitu">
+          <button type="button" data-s="job" aria-pressed="false">취업 준비 중</button>
+          <button type="button" data-s="work" aria-pressed="false">재직 중 커리어 고민</button>
+          <button type="button" data-s="move" aria-pressed="false">이직 희망</button>
+          <button type="button" data-s="study" aria-pressed="false">학생</button>
+          <button type="button" data-s="free" aria-pressed="false">프리랜서</button>
+        </div>
+      </div>
+    </div>
+    <p class="bcap lab">이 두 칸은 <b>점수와 순위에 아무 영향이 없다.</b> 이름은 호칭에만 쓰고,
+      상황은 맨 아래 「추천하는 행동」에서 <b>내가 써둔 다섯 벌의 문장 틀 중 하나를 고르는 데만</b> 쓴다.
+      사주가 상황을 읽는 게 아니라, 상황이 문장 틀을 고르고 사주가 빈칸을 채운다.</p>
+    <p class="bcap litely" style="font-size:var(--f-xs);color:var(--tx3);margin:12px 0 0">
+      이름·상황은 순위에 영향을 주지 않아요. 부르는 말과 행동 제안에만 쓰입니다 🍀</p>
+    <div class="gorow">
+      <button type="button" id="bgo" class="go">결과 보기</button>
+      <p class="bmsg" id="bmsg"></p>
+    </div>
+  </div>
 
 </section>
 
@@ -738,6 +795,20 @@ body{line-height:1.7}
       <button class="reroll" id="funroll" type="button" hidden>다른 직업 보기</button></div>
     <p class="advline" id="advline"></p>
     <p class="advcap lab" id="advcap"></p>
+  </div>
+
+  <div class="panel actpanel" id="actpanel" hidden>
+    <div class="panelhead"><h2 id="acttitle">추천하는 행동</h2>
+      <span class="hint" id="acthint"></span></div>
+    <div class="chips sm" id="asitu" style="margin-bottom:14px">
+      <button type="button" data-s="job" aria-pressed="false">취업 준비 중</button>
+      <button type="button" data-s="work" aria-pressed="false">재직 중 커리어 고민</button>
+      <button type="button" data-s="move" aria-pressed="false">이직 희망</button>
+      <button type="button" data-s="study" aria-pressed="false">학생</button>
+      <button type="button" data-s="free" aria-pressed="false">프리랜서</button>
+    </div>
+    <div class="actlist" id="actout"></div>
+    <p class="advcap lab" id="actcap"></p>
   </div>
 
   <details class="manual">
@@ -2119,6 +2190,36 @@ document.getElementById('bsex').addEventListener('click',e=>{
   document.getElementById('bmsg').textContent='';
   if(document.body.classList.contains('step2')) birthCalc();
 });
+
+// --- 호칭 · 현재 상황 ---
+// 둘 다 **점수·순위에 손대지 않는다.** 이름은 부르는 말에만, 상황은 「추천하는 행동」의
+// 문장 틀을 고르는 데에만 쓴다. 계산에 끼워 넣지 않은 이유: 사주 자료에는 「지금 취업 준비 중」을
+// 가리키는 축이 없다. 넣으면 없는 근거를 지어내는 것이 된다.
+let BNAME='', BSITU=null;
+function who(){
+  if(BNAME) return `${BNAME}님`;
+  return NICKW ? `「${NICKW}」님` : '당신';
+}
+function syncSitu(){
+  document.querySelectorAll('#bsitu button, #asitu button').forEach(b=>
+    b.setAttribute('aria-pressed', String(b.dataset.s===BSITU)));
+  const h=document.getElementById('whohint');
+  if(h) h.textContent = BNAME ? `${BNAME}님의 분석에 필요한 정보예요`
+                              : '분석에 쓸 정보를 넣어주세요';
+}
+document.getElementById('bname').addEventListener('input',e=>{
+  BNAME=e.target.value.trim().replace(/님$/,'');   // 「의연님」이라 적으면 「의연님님」이 된다
+  syncSitu();
+  if(document.body.classList.contains('step2')){ if(ADVPICKS) renderAdvice(ADVPICKS); renderActions(); }
+});
+['bsitu','asitu'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    const b=e.target.closest('button[data-s]'); if(!b) return;
+    BSITU = BSITU===b.dataset.s ? null : b.dataset.s;   // 다시 누르면 해제된다
+    syncSitu();
+    if(document.body.classList.contains('step2')) renderActions();
+  });
+});
 // 화면 전환 — 1: 입력 / 2: 별명·결과.
 // 입력하는 동안에는 계산하지 않는다. 미리 돌리면 머리말의 별명이 먼저 새서 「결과 보기」가 무의미해진다.
 function showScreen(n){
@@ -2370,7 +2471,7 @@ function run(){
 
   renderStab(picks,list,STB);
 
-  LAST={list,tSort,stb:STB,key:picks.join('')+'|'+WMODE+(ZON?'z':'')};
+  LAST={list,tSort,stb:STB,picks,key:picks.join('')+'|'+WMODE+(ZON?'z':'')};
   variant=0;
   invent();
 }
@@ -2523,7 +2624,7 @@ function renderAdvice(picks){
 
   const line=document.getElementById('advline'), cap=document.getElementById('advcap');
   document.getElementById('advtitle').textContent =
-    NICKW ? `「${NICKW}」님을 위한 한마디` : '한마디';
+    (NICKW||BNAME) ? `${who()}을 위한 한마디` : '한마디';
   document.querySelectorAll('#advbtns button').forEach(b=>
     b.setAttribute('aria-pressed', String(b.dataset.m===ADVMODE)));
   document.getElementById('funroll').hidden = ADVMODE!=='fun';
@@ -3074,7 +3175,7 @@ function pick(arr,n){return arr[n%arr.length]}
 
 function invent(){
   const ivp=document.getElementById('ivpanel');
-  if(!LAST||!LAST.list.length){ivp.hidden=true;renderFun();return}
+  if(!LAST||!LAST.list.length){ivp.hidden=true;renderFun();renderActions();return}
   const {list,tSort,key}=LAST;
 
   // 관심도를 곱해 다시 정렬한다. 자료 점수는 그대로 두고 순서만 바뀐다.
@@ -3161,6 +3262,129 @@ function invent(){
      </div>`).join('');
   ivp.hidden=false;
   renderFun();   // 순위가 바뀌면 농담 목록도 같이 다시 뽑는다
+  renderActions();  // 1등 범주가 바뀌면 행동 제안의 빈칸도 같이 바뀐다
+}
+
+// --- 추천하는 행동 ---
+// 순위표보다 **한 층 더 자료에서 먼 자리다.** 무엇이 이 문장을 정했는지 칸마다 적어둔다.
+//   문장 틀 = 첫 화면의 상황 버튼 — 내가 손으로 써둔 다섯 벌 중 하나
+//   빈칸    = 128설정 집계 1등 범주의 분야어·직능어
+//   마지막 줄 = 가장 적은 오행(「한마디」와 같은 계산)
+// 점수·순위는 한 글자도 안 건드린다 — 관심도 체크·이름 조합기와 같은 층이다.
+// 상황은 계산에 넣지 않았다. 사주 자료에는 「지금 취업 준비 중」을 가리키는 축이 없어서,
+// 넣으면 없는 근거를 지어내는 것이 된다. 그래서 **문장 틀을 고르는 데에만** 쓴다.
+const SITU_N={job:'취업 준비 중',work:'재직 중 커리어 고민',move:'이직 희망',
+              study:'학생',free:'프리랜서'};
+// 조사 자동 보정 — 빈칸에 무엇이 들어오는지 미리 알 수 없어서 「플랫폼로」·「금융·상업와」가 나온다.
+// 템플릿에 ^로 ^와 ^이 처럼 캐럿을 붙여두면 **바로 앞 글자의 받침**을 보고 고른다.
+// 앞 글자와 캐럿 사이에 </b>가 끼어도(굵게 표시한 빈칸) 태그를 넘겨 앞 글자를 본다.
+const JOSA={'로':['으로','로'],'와':['과','와'],'이':['이','가'],'은':['은','는'],'을':['을','를']};
+const fixJosa=s=>s.replace(/([가-힣A-Za-z0-9])(<\/b>)?\^([로와이은을])/g,(m,ch,tag,j)=>{
+  const c=ch.charCodeAt(0);
+  const jong = (c>=0xAC00&&c<=0xD7A3) ? (c-0xAC00)%28 : 0;   // 한글이 아니면 받침 없음으로 본다
+  // ㄹ 받침(jong 8)은 「~로」를 쓴다 — 「건설으로」가 아니라 「건설로」다
+  const bat = (j==='로') ? (jong!==0 && jong!==8) : jong!==0;
+  return ch+(tag||'')+JOSA[j][bat?0:1];
+});
+const ACT={
+ job:{do:[
+   `<b>{cat}</b> 채용공고 다섯 개를 열어 <b>자격요건만</b> 긁어 모아라. 다섯 군데가 똑같이 요구하는 단어 세 개가 다음 달 할 일이다. 다섯 개 다 「유관 경력 3년」이면 그건 사주 문제가 아니라 세상 문제다.`,
+   `<b>{d}</b> 쪽으로 <b>하루 만에 끝나는 것</b> 하나를 만들어 인터넷에 던져라. 완성도는 포기해라. 아무도 안 볼 확률이 높은데, 연습 조건으로는 그게 최고다.`,
+   `<b>{j}</b>^로 일하는 사람에게 「하루 중 뭐 하는 데 시간을 제일 많이 쓰나」만 물어라. 답이 「보람」이면 인사하고 나와라. 우리는 실무를 물었다.`],
+  no:`이 결과 때문에 <b>준비하던 걸 접지 마라.</b> 위 1등은 128가지 설정 중 {p}%에서만 1등한 애다. 믿을 거면 딱 그만큼만 믿어라.`},
+ work:{do:[
+   `지금 맡은 일 중 <b>{cat}</b>에 제일 가까운 것 하나를 골라 2주만 <b>유난스럽게</b> 잘해봐라. 회삿돈으로 하는 적성검사다.`,
+   `<b>{d}</b> 쪽으로 <b>팀 밖 사람이 나에게 뭘 부탁하는지</b> 세어봐라. 남이 자꾸 시키는 일이 시장이 인정한 일이다. 슬프지만 그렇다.`,
+   `2주 동안 「지겨웠던 일」과 「시간 순삭된 일」을 하루 한 줄씩 적어라. 이 메모가 이 사이트보다 정확하다. 만든 사람이 보증한다.`],
+  no:`<b>오늘 사표 쓰지 마라.</b> {p}%짜리 신호다. 그 확률로 우산 안 들고 나가면 젖는다.`},
+ move:{do:[
+   `<b>{cat}</b> 쪽 공고 세 개에 <b>지금 이력서 그대로</b> 넣어봐라. 서류 탈락도 자료다. 사주는 답장을 안 해준다.`,
+   `옮기려는 이유를 한 줄로 써라. 「{cat}^이 맞아서」는 탈락이다. <b>지금 회사에서 못 얻는 것 하나</b>로 다시 써라. 그게 안 써지면 문제는 회사가 아닐 수도 있다.`,
+   `<b>{j}</b>^로 일하는 사람 둘에게 「1년 차 때 뭐 때문에 울 뻔했나」를 물어라. 자랑은 이미 링크드인에 다 있다.`],
+  no:`<b>이걸 이직 사유로 대지 마라.</b> 설정 하나만 만지면 <b>{alt}</b>^이 1등이 된다. 면접에서 「사주가 그러던데요」는… 기억엔 남겠다.`},
+ study:{do:[
+   `<b>{cat}</b> 쪽 수업·동아리·공모전 중 <b>딱 하나만 이번 학기에 진짜로 등록</b>해라. 적성검사 열 번보다 한 학기 한 번이 세다.`,
+   `<b>{d}</b>^로 학기 끝까지 남는 결과물 하나를 만들어라. 과제 말고 <b>남이 볼 수 있는 것</b>으로. 조별과제 무임승차자 말고 네 이름으로 남는 것.`,
+   `<b>{j}</b>^로 일하는 졸업생 한 명을 30분만 붙잡아라. 커리어센터가 이 연결을 공짜로 해준다. 등록금에 이미 포함돼 있다.`],
+  no:`<b>이걸로 전공 바꾸지 마라.</b> 되돌리는 데 학기가 든다. 이 도구는 그 정도를 책임질 처지가 아니다.`},
+ free:{do:[
+   `<b>{cat}</b> 쪽으로 지금 팔 수 있는 것을 한 줄로 적어라 — 뭘 / 얼마에 / 며칠 안에. 셋 다 못 적으면 상품이 아니라 취미다.`,
+   `<b>{d}</b> 쪽으로 <b>이미 나에게 돈을 준 적 있는 사람</b> 셋에게 먼저 연락해라. 신규 영업보다 싸고, 안부 인사인 척할 수도 있다.`,
+   `<b>{cat2}</b>^와 겹치는 지점을 하나 만들어 묶음으로 팔아라. 2순위 범주는 이럴 때 쓴다. 이름은 거창하게 붙일수록 잘 팔린다.`],
+  no:`<b>들어오던 일을 끊고 갈아타지 마라.</b> 옮기더라도 매출이 <b>겹치는 3개월</b>은 만들어라. 통장은 사주를 안 본다.`},
+};
+// 결핍 오행 → 행동. 「한마디」가 태도라면 이건 이번 주에 할 수 있는 동작이다.
+const LACKACT={
+ 목:`계획 다 세우기 전에 <b>제일 작은 것 하나를 그냥 시작</b>해라. 계획 페이지를 또 만드는 건 시작이 아니다. 뻗어나가는 축이 제일 적다.`,
+ 화:`이번 주에 한 일을 <b>한 번은 남에게 자랑</b>해라. 아무도 안 물어봤다고? 원래 아무도 안 물어본다. 드러내는 축이 제일 적다.`,
+ 토:`새로 벌이기 전에 <b>벌여둔 것 하나를 끝내라.</b> 시작해놓은 사이드프로젝트 개수를 세보면 안다. 가라앉히는 축이 제일 적다.`,
+ 금:`이번 주에 <b>하나는 거절해라.</b> 「일정이 안 돼서요」 한 줄이면 된다. 끊어내는 축이 제일 적다.`,
+ 수:`<b>아무것도 안 하는 두 시간</b>을 일정에 넣어라. 거기에 딴 일을 넣으면 그냥 일정이다. 물러서는 축이 제일 적다.`,
+};
+
+function renderActions(){
+  const panel=document.getElementById('actpanel'), box=document.getElementById('actout'),
+        cap=document.getElementById('actcap'), hint=document.getElementById('acthint');
+  if(!LAST||!LAST.list.length){ panel.hidden=true; return; }
+  panel.hidden=false;
+  document.getElementById('acttitle').textContent=`${who()}에게 추천하는 행동`;
+  syncSitu();
+
+  const cats=funCats(), c1=cats[0]||'기타', c2=cats[1]||c1;
+  const stb=LAST.stb, n=stb?stb.n:0;
+  const pct = n ? Math.round((stb.t1[c1]||0)/n*100) : 0;
+  const r1 = stb ? Object.entries(stb.t1).sort((a,b)=>b[1]-a[1]) : [];
+  const alt = (r1[1]&&r1[1][0]) || c2;
+
+  // 결핍 오행 — 「한마디」와 **같은 계산**을 쓴다. 두 자리에서 다른 오행이 나오면 거짓말이 된다.
+  const chosen=(LAST.picks||[]).filter(Boolean);
+  const oh={목:0,화:0,토:0,금:0,수:0};
+  chosen.forEach(x=>{oh[ELG[x[0]]]++; oh[ELZ[x[1]]]++;});
+  const min=Math.min(...Object.values(oh)), tot=chosen.length*2;
+  const tied=Object.keys(oh).filter(k=>oh[k]===min);
+  const el=tied[hash(chosen.join('')+'lack')%tied.length];
+
+  // 빈칸 채우기 — 사주 해시로 고른다. 같은 사주 + 같은 상황이면 늘 같은 문장이 나온다.
+  const h=hash(chosen.join('')+'|act|'+(BSITU||''));
+  const E=CATX[c1]||CATX['기타'];
+  const pk=(arr,s)=>(arr&&arr.length)?arr[(h+s*7)%arr.length]:'';
+  const fill=s=>s.replace(/{cat2}/g,c2).replace(/{cat}/g,c1)
+                 .replace(/{d}/g,pk(E.d,1))
+                 .replace(/{j}/g,pk([...(E.j||[]),...(E.jx||[])],2))
+                 .replace(/{p}/g,pct).replace(/{alt}/g,alt);
+  const F=s=>fixJosa(fill(s));
+
+  const card=(no,txt,chips,kind)=>
+    `<div class="act${kind?' '+kind:''}"><span class="an">${no}</span><div class="ab">
+       <p class="at">${txt}</p>
+       <div class="af lab">${chips.map(c=>`<span class="${c[1]||''}">${c[0]}</span>`).join('')}</div>
+     </div></div>`;
+
+  const src=[[`상황 · ${BSITU?SITU_N[BSITU]:'미선택'}`,'s1'],
+             [`범주 · ${c1}`],[`128설정 1등 ${pct}%`],['원문에 없는 내 문장','s2']];
+  const cards=[];
+  if(BSITU) ACT[BSITU].do.forEach((t,i)=>cards.push(card(String(i+1).padStart(2,'0'),F(t),src)));
+  cards.push(card(BSITU?'04':'01', LACKACT[el],
+    [[`오행 · ${el} ${min}/${tot}로 최소`,'s1'],['상황과 무관'],['원문에 없는 내 문장','s2']]));
+  if(BSITU) cards.push(card('✕', F(ACT[BSITU].no),
+    [[`상황 · ${SITU_N[BSITU]}`,'s1'],[`설정 바꾸면 ${alt}`],['원문에 없는 내 문장','s2']], 'no'));
+
+  box.innerHTML =
+    (BSITU?'':`<p class="actempty">위 버튼에서 <b>지금 상황</b>을 누르면 맞춤 잔소리 네 줄이 나온다.
+       아래 한 줄은 상황과 상관없이 오행이 시키는 것이다.</p>`)+cards.join('');
+
+  hint.innerHTML=
+    `<span class="lab">1등 범주 <b>${c1}</b> · 128설정 중 <b>${pct}%</b>에서 1등</span>`+
+    `<span class="litely">${nice(c1)} 쪽으로 맞춰 뽑았어요 🍀</span>`;
+
+  cap.innerHTML=fixJosa(
+    `<b>이 칸은 자료에서 가장 먼 자리다.</b> 문장 틀은 <b>상황 버튼</b>이 고르고(내가 손으로 써둔 다섯 벌),
+     굵게 표시된 빈칸만 <b>1등 범주 ${c1}</b>의 분야어·직능어로 채운다.
+     마지막 한 줄은 가장 적은 오행 <b>${el}</b>^이 고른다 — 위 「한마디」와 같은 계산이다.
+     ${BSITU?`상황 버튼을 다른 것으로 눌러보라. <b>같은 사주인데 문장이 통째로 바뀐다</b> —
+       바뀌는 부분은 사주가 쓴 게 아니라 버튼이 고른 것이다. `:''}
+     상황은 <b>점수·순위에 한 글자도 영향을 주지 않는다.</b> 사주 자료에는 「지금 취업 준비 중」을
+     가리키는 축이 아예 없어서, 계산에 넣으면 없는 근거를 지어내는 것이 된다.`);
 }
 
 document.getElementById('reroll').addEventListener('click',()=>{variant++;invent()});
